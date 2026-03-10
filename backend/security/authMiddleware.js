@@ -1,21 +1,20 @@
-const jwt = require('jsonwebtoken');
+// backend/security/authMiddleware.js
+const jwt = require("jsonwebtoken");
 
-// Middleware pour vérifier le token JWT
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+function verifyToken(req, res, next) {
+  const token = req.headers["authorization"];
 
   if (!token) {
-    return res.status(401).json({ error: 'Access token required' });
+    return res.status(403).json({ error: "No token provided" });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || 'your_secret_key', (err, user) => {
-    if (err) {
-      return res.status(403).json({ error: 'Invalid or expired token' });
-    }
-    req.user = user;
+  try {
+    const decoded = jwt.verify(token, "secret_key");
+    req.user = decoded;
     next();
-  });
-};
+  } catch (err) {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+}
 
-module.exports = { authenticateToken };
+module.exports = verifyToken;

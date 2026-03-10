@@ -1,11 +1,8 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './setupTests';
+import { render, screen } from '@testing-library/react';
 import App from './App';
 
-describe('App', () => {
-  test('renders without crashing', () => {
-    const root = ReactDOM.createRoot(document.createElement('div'));
-    root.render(<App />);
-  });
+test('renders learn react link', () => {
+  render(<App />);
+  const linkElement = screen.getByText(/learn react/i);
+  expect(linkElement).toBeInTheDocument();
 });
