@@ -3,11 +3,13 @@
 # dependencies
 backend/node_modules/
 frontend/node_modules/
-# testing
-/coverage
+/.pnp
+.pnp.js
 
-# production
-/build
+# environment
+backend/.env
+frontend/.env
+
 
 # misc
 .DS_Store
