@@ -1,0 +1,192 @@
+.compte-shell {
+  min-height: 100vh;
+  background: radial-gradient(circle at top left, rgba(120, 61, 30, 0.24), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(89, 39, 14, 0.24), transparent 35%),
+    #24160e;
+  color: #f3ece5;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  box-sizing: border-box;
+}
+
+.compte-card {
+  width: min(100%, 980px);
+  background: rgba(48, 23, 15, 0.94);
+  border: 1px solid rgba(170, 110, 75, 0.22);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 20px 50px rgba(20, 12, 8, 0.28);
+}
+
+.compte-heading h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #f3ece5;
+}
+
+.compte-heading p {
+  margin: 12px 0 0;
+  color: #d8c6b4;
+  line-height: 1.8;
+}
+
+.compte-form {
+  display: grid;
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.compte-field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: #e7d5c4;
+}
+
+.compte-field span {
+  font-size: 0.95rem;
+}
+
+.compte-field input {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(170, 110, 75, 0.35);
+  color: #f3ece5;
+  font-size: 1rem;
+  padding: 14px 16px;
+  border-radius: 14px;
+  outline: none;
+}
+
+.compte-field input::placeholder {
+  color: rgba(243, 236, 229, 0.65);
+}
+
+.compte-field input:focus {
+  border-color: rgba(190, 128, 87, 0.9);
+  box-shadow: 0 0 0 4px rgba(190, 128, 87, 0.12);
+}
+
+.compte-button {
+  width: fit-content;
+  background: linear-gradient(135deg, #7f4a2f 0%, #b37a52 100%);
+  color: #24160e;
+  border: none;
+  border-radius: 999px;
+  padding: 14px 28px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.compte-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 30px rgba(124, 72, 46, 0.22);
+}
+
+.compte-button.logout {
+  margin-top: 24px;
+  background: #6b2f1d;
+  color: #f3ece5;
+}
+
+.compte-button.logout:hover {
+  background: #843d28;
+}
+
+.compte-info {
+  margin-top: 28px;
+}
+
+.compte-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.compte-summary h2 {
+  margin: 0;
+  color: #f3ece5;
+}
+
+.compte-summary p {
+  margin: 10px 0 0;
+  color: #d8c6b4;
+  line-height: 1.7;
+}
+
+.compte-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: #b37a52;
+  color: #24160e;
+  font-weight: 700;
+}
+
+.history-wrapper {
+  margin-top: 30px;
+}
+
+.history-wrapper h3 {
+  margin: 0 0 18px;
+  color: #f3ece5;
+}
+
+.history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 22px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(170, 110, 75, 0.18);
+}
+
+.history-item strong {
+  color: #f8f0e8;
+}
+
+.history-item p {
+  margin: 6px 0 0;
+  color: #d8c6b4;
+  font-size: 0.95rem;
+}
+
+.history-item span {
+  color: #e7d5c4;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .compte-shell {
+    padding: 18px;
+  }
+
+  .compte-card {
+    padding: 24px;
+  }
+
+  .compte-summary {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .history-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

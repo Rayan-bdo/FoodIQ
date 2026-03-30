@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './navbar.css';
+import Compte from '../compte/compte';
 
 const tabs = [
   { id: 'compte', label: 'Compte' },
@@ -10,7 +11,6 @@ const tabs = [
 ];
 
 const descriptions = {
-  compte: 'Accédez à votre profil, votre historique de scans et vos préférences FoodIQ.',
   recommendations: 'Recevez des recommandations personnalisées pour des choix alimentaires plus sains.',
   scan: 'Scannez un code-barres pour obtenir immédiatement les informations nutritionnelles du produit.',
   ia: 'Posez vos questions à l’assistant intelligent pour mieux comprendre la qualité nutritionnelle.',
@@ -39,10 +39,14 @@ function Navbar() {
         </ul>
       </nav>
 
-      <section className="navbar-content">
-        <h2>{tabs.find((tab) => tab.id === activeTab)?.label}</h2>
-        <p>{descriptions[activeTab]}</p>
-      </section>
+      {activeTab === 'compte' ? (
+        <Compte />
+      ) : (
+        <section className="navbar-content">
+          <h2>{tabs.find((tab) => tab.id === activeTab)?.label}</h2>
+          <p>{descriptions[activeTab]}</p>
+        </section>
+      )}
     </div>
   );
 }
