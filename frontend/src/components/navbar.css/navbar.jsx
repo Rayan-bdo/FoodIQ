@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import './navbar.css';
 
 const tabs = [
@@ -20,13 +21,29 @@ const descriptions = {
 function Navbar() {
   const [activeTab, setActiveTab] = useState('scan');
 
+  const contentVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  };
+
   return (
     <div className="navbar-shell">
       <nav className="navbar">
-        <div className="navbar-brand">FoodIQ</div>
+        <motion.div
+          className="navbar-brand"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+        >
+          FoodIQ
+        </motion.div>
         <ul className="navbar-menu">
           {tabs.map((tab) => (
-            <li key={tab.id}>
+            <motion.li
+              key={tab.id}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
               <button
                 type="button"
                 className={tab.id === activeTab ? 'navbar-link active' : 'navbar-link'}
@@ -34,15 +51,21 @@ function Navbar() {
               >
                 {tab.label}
               </button>
-            </li>
+            </motion.li>
           ))}
         </ul>
       </nav>
 
-      <section className="navbar-content">
+      <motion.section
+        className="navbar-content"
+        key={activeTab}
+        initial="hidden"
+        animate="visible"
+        variants={contentVariants}
+      >
         <h2>{tabs.find((tab) => tab.id === activeTab)?.label}</h2>
         <p>{descriptions[activeTab]}</p>
-      </section>
+      </motion.section>
     </div>
   );
 }
