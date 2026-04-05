@@ -3,11 +3,11 @@ import './navbar.css';
 import Compte from '../compte/compte';
 
 const tabs = [
-  { id: 'compte', label: 'Compte' },
-  { id: 'recommendations', label: 'Recommendations' },
-  { id: 'scan', label: 'Scan' },
-  { id: 'ia', label: 'IA' },
-  { id: 'recherche', label: 'Recherche' },
+  { id: 'compte', label: '👤 Compte' },
+  { id: 'recommendations', label: '💡 Recommandations' },
+  { id: 'scan', label: '📷 Scan' },
+  { id: 'ia', label: '🤖 IA' },
+  { id: 'recherche', label: '🔎 Recherche' },
 ];
 
 const descriptions = {
@@ -21,15 +21,16 @@ function Navbar() {
   const [activeTab, setActiveTab] = useState('scan');
 
   return (
-    <div className="navbar-shell">
+    <div className="app">
+      {/* HEADER */}
       <nav className="navbar">
-        <div className="navbar-brand">FoodIQ</div>
+        <div className="navbar-brand">🍏 FoodIQ</div>
+
         <ul className="navbar-menu">
           {tabs.map((tab) => (
             <li key={tab.id}>
               <button
-                type="button"
-                className={tab.id === activeTab ? 'navbar-link active' : 'navbar-link'}
+                className={`navbar-link ${tab.id === activeTab ? 'active' : ''}`}
                 onClick={() => setActiveTab(tab.id)}
               >
                 {tab.label}
@@ -39,14 +40,29 @@ function Navbar() {
         </ul>
       </nav>
 
-      {activeTab === 'compte' ? (
-        <Compte />
-      ) : (
-        <section className="navbar-content">
-          <h2>{tabs.find((tab) => tab.id === activeTab)?.label}</h2>
-          <p>{descriptions[activeTab]}</p>
-        </section>
-      )}
+      {/* CONTENU */}
+      <main className="main-content">
+        {activeTab === 'compte' ? (
+          <Compte />
+        ) : (
+          <div className="content-card">
+            <h2 className="title">
+              {tabs.find((tab) => tab.id === activeTab)?.label}
+            </h2>
+
+            <p className="description">
+              {descriptions[activeTab]}
+            </p>
+
+            {/* BOUTON PRINCIPAL */}
+            {activeTab === 'scan' && (
+              <button className="scan-button">
+                📷 Scanner un produit
+              </button>
+            )}
+          </div>
+        )}
+      </main>
     </div>
   );
 }
