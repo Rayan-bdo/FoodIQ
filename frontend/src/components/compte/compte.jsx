@@ -16,9 +16,8 @@ function Compte() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!name.trim() || !email.trim() || !password.trim()) {
-      return;
-    }
+    if (!name.trim() || !email.trim() || !password.trim()) return;
+
     setAccountCreated(true);
     setHistory(initialHistory);
   };
@@ -34,63 +33,78 @@ function Compte() {
   return (
     <div className="compte-shell">
       <div className="compte-card">
-        <div className="compte-heading">
-          <h1>Mon compte FoodIQ</h1>
-          <p>Créez votre compte pour retrouver votre historique de scans et suivre vos produits favoris.</p>
-        </div>
 
         {!accountCreated ? (
-          <form className="compte-form" onSubmit={handleSubmit}>
-            <label className="compte-field">
-              <span>Nom complet</span>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Ex: Youssef"
-              />
-            </label>
-
-            <label className="compte-field">
-              <span>Email</span>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="exemple@mail.com"
-              />
-            </label>
-
-            <label className="compte-field">
-              <span>Mot de passe</span>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-              />
-            </label>
-
-            <button className="compte-button" type="submit">
-              Créer le compte
-            </button>
-          </form>
-        ) : (
-          <div className="compte-info">
-            <div className="compte-summary">
-              <div>
-                <h2>Bienvenue, {name}</h2>
-                <p>Votre compte est créé et votre historique de scans est prêt.</p>
-              </div>
-              <span className="compte-badge">Actif</span>
+          <>
+            <div className="compte-heading">
+              <h1>Créer ton compte</h1>
+              <p>Accède à ton historique et tes analyses FoodIQ</p>
             </div>
 
-            <button className="compte-button logout" type="button" onClick={handleLogout}>
-              Se déconnecter
-            </button>
+            <form className="compte-form" onSubmit={handleSubmit}>
+              <input
+                type="text"
+                placeholder="👤 Nom complet"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
 
+              <input
+                type="email"
+                placeholder="📧 Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+
+              <input
+                type="password"
+                placeholder="🔒 Mot de passe"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+
+              <button className="compte-button" type="submit">
+                🚀 Créer le compte
+              </button>
+            </form>
+          </>
+        ) : (
+          <div className="compte-info">
+
+            {/* HEADER PROFIL */}
+            <div className="profile-header">
+              <div>
+                <h2>👋 {name}</h2>
+                <p>Score santé moyen : <strong>78 🟡</strong></p>
+              </div>
+
+              <button className="compte-button logout" onClick={handleLogout}>
+                Déconnexion
+              </button>
+            </div>
+
+            {/* STATS */}
+            <div className="stats">
+              <div className="stat-card">
+                <h3>{history.length}</h3>
+                <p>Produits scannés</p>
+              </div>
+
+              <div className="stat-card green">
+                <h3>12</h3>
+                <p>Bons produits</p>
+              </div>
+
+              <div className="stat-card red">
+                <h3>6</h3>
+                <p>Mauvais</p>
+              </div>
+            </div>
+
+            {/* HISTORIQUE */}
             <div className="history-wrapper">
-              <h3>Historique des scans</h3>
+              <h3>📊 Historique</h3>
+
               <ul className="history-list">
                 {history.map((item) => (
                   <li key={item.id} className="history-item">
@@ -103,6 +117,7 @@ function Compte() {
                 ))}
               </ul>
             </div>
+
           </div>
         )}
       </div>
