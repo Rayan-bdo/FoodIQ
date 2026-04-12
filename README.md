@@ -74,3 +74,42 @@ Le projet peut également utiliser :
 ## Architecture du projet
 
 Le projet suit une architecture classique basée sur la séparation entre le frontend et le backend.
+
+
+🔐 Sécurité de l’application
+
+La sécurité constitue un aspect essentiel du projet FoodIQ, notamment en raison de la gestion des données utilisateurs, des interactions avec des API externes et de l’exposition de services via une API web. Plusieurs mécanismes ont été mis en place afin de garantir la confidentialité, l’intégrité et la disponibilité des données.
+
+🔑 Authentification et gestion des sessions
+
+L’authentification des utilisateurs est basée sur l’utilisation de JSON Web Tokens (JWT) stockés de manière sécurisée dans des cookies HTTP.
+
+Utilisation de cookies avec les attributs HttpOnly, Secure et SameSite pour limiter les attaques XSS et CSRF
+Vérification du token côté serveur pour sécuriser les routes protégées
+Gestion des accès selon les rôles (utilisateur, administrateur)
+🛡️ Protection des API
+
+Afin de protéger les endpoints de l’API contre les abus et les attaques :
+
+Mise en place d’un rate limiting pour limiter le nombre de requêtes par utilisateur (protection contre les attaques DoS)
+Validation et sanitisation des données entrantes pour éviter les injections (NoSQL injection, XSS)
+Utilisation de middlewares de sécurité (ex : helmet) pour sécuriser les headers HTTP
+🔒 Sécurisation des données
+Les mots de passe des utilisateurs sont hachés (bcrypt) avant stockage en base de données
+Aucune donnée sensible n’est stockée en clair
+Les variables sensibles (clés API, secrets JWT) sont stockées dans des variables d’environnement (.env)
+🌐 Sécurité des communications
+Utilisation du protocole HTTPS pour chiffrer les échanges entre le client et le serveur
+Protection contre les attaques de type Man-in-the-Middle
+🚫 Protection contre les abus et la fraude
+
+Dans le contexte spécifique de FoodIQ, des mécanismes sont envisagés pour limiter les usages frauduleux :
+
+Détection de requêtes anormales ou répétitives (bot, scraping abusif)
+Vérification de la cohérence des données liées aux codes-barres (ex : produits dupliqués ou incohérents)
+Limitation des appels aux API externes pour éviter les abus
+🔍 Bonnes pratiques de développement sécurisé
+Séparation claire entre frontend et backend
+Utilisation de dépendances maintenues et mises à jour régulièrement
+Principe du moindre privilège dans l’accès aux ressources
+Gestion centralisée des erreurs pour éviter les fuites d’informations sensibles
