@@ -2,6 +2,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./Profil.css";
 
+import { FaChartBar, FaCheckCircle, FaStar } from "react-icons/fa";
+
 export default function Profil() {
   const navigate = useNavigate();
 
@@ -19,30 +21,15 @@ export default function Profil() {
   };
 
   const scans = [
-    {
-      name: "Granola Bio Miel",
-      brand: "Nature's Path",
-      score: 82,
-      label: "Excellent",
-    },
-    {
-      name: "Yaourt Grec Nature",
-      brand: "Fage",
-      score: 71,
-      label: "Bon",
-    },
-    {
-      name: "Chips Barbecue",
-      brand: "Lay's",
-      score: 18,
-      label: "Mauvais",
-    },
+    { name: "Granola Bio Miel", brand: "Nature's Path", score: 82, label: "Excellent" },
+    { name: "Yaourt Grec Nature", brand: "Fage", score: 71, label: "Bon" },
+    { name: "Chips Barbecue", brand: "Lay's", score: 18, label: "Mauvais" }
   ];
 
   return (
     <div className="profil-container">
 
-      {/* 👤 USER HEADER */}
+      {/* 👤 HEADER */}
       <div className="user-header">
         <h2>👤 {user?.username || "Rayan"}</h2>
         <p>📧 {user?.email || "rayan@gmail.com"}</p>
@@ -51,24 +38,30 @@ export default function Profil() {
 
       {/* 📊 STATS */}
       <div className="stats-container">
+
         <div className="stat-card">
+          <FaChartBar className="stat-icon" />
           <h3>{stats.scans}</h3>
           <p>Scans</p>
         </div>
 
         <div className="stat-card">
+          <FaCheckCircle className="stat-icon" />
           <h3>{stats.goodRate}%</h3>
           <p>Bon choix</p>
         </div>
 
         <div className="stat-card">
+          <FaStar className="stat-icon" />
           <h3>{stats.favoris}</h3>
           <p>Favoris</p>
         </div>
+
       </div>
 
       {/* 📜 HISTORY */}
       <div className="history-container">
+
         <div className="history-header">
           <h3>Derniers scans</h3>
           <span>Voir tout &gt;</span>
@@ -89,6 +82,7 @@ export default function Profil() {
             </div>
           </div>
         ))}
+
       </div>
 
       {/* 🚪 LOGOUT */}

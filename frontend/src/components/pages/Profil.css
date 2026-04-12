@@ -1,29 +1,18 @@
 .profil-container {
   padding: 20px;
-  padding-bottom: 110px; /* 🔥 évite que la navbar cache le bouton */
+  padding-bottom: 110px; /* 🔥 évite navbar */
   background: #f5f6f8;
   min-height: 100vh;
   box-sizing: border-box;
 }
 
-/* 👤 HEADER USER */
+/* 👤 HEADER */
 .user-header {
   background: white;
   padding: 15px;
   border-radius: 14px;
   margin-bottom: 15px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.user-header h2 {
-  margin: 0;
-  font-size: 18px;
-}
-
-.user-header p {
-  margin: 4px 0;
-  color: #666;
-  font-size: 14px;
 }
 
 /* 📊 STATS */
@@ -40,6 +29,12 @@
   border-radius: 14px;
   text-align: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.stat-icon {
+  font-size: 20px;
+  color: #2ecc71;
+  margin-bottom: 5px;
 }
 
 .stat-card h3 {
@@ -65,40 +60,15 @@
   margin-bottom: 10px;
 }
 
-.history-header h3 {
-  margin: 0;
-  font-size: 16px;
-}
-
-.history-header span {
-  font-size: 13px;
-  color: #2ecc71;
-  cursor: pointer;
-}
-
-/* 🧾 SCAN CARD */
+/* 🧾 CARD */
 .scan-card {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-
   background: white;
   padding: 12px;
   border-radius: 14px;
   margin-bottom: 10px;
-
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.scan-card h4 {
-  margin: 0;
-  font-size: 14px;
-}
-
-.scan-card p {
-  margin: 2px 0;
-  font-size: 12px;
-  color: #777;
 }
 
 /* 🏷 LABELS */
@@ -106,8 +76,6 @@
   font-size: 11px;
   padding: 3px 8px;
   border-radius: 10px;
-  display: inline-block;
-  margin-top: 5px;
 }
 
 .label.excellent {
@@ -131,25 +99,15 @@
   font-weight: bold;
 }
 
-/* 🚪 LOGOUT BUTTON */
+/* 🚪 BUTTON */
 .logout-btn {
   width: 100%;
   padding: 14px;
-
   background: #e74c3c;
   color: white;
   border: none;
   border-radius: 14px;
-
-  font-size: 14px;
   font-weight: bold;
-
   cursor: pointer;
-
   margin-top: 10px;
-  margin-bottom: 20px;
-}
-
-.logout-btn:hover {
-  background: #c0392b;
 }
