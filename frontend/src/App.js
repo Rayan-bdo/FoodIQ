@@ -3,12 +3,13 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './components/navbar/navbar';
 
-// IMPORT TES PAGES
-import Scanner from './components/pages/Scanner';
+// PAGES
+import Scanner from './components/pages/Scanner'; 
 import Historique from './components/pages/Historique';
 import IA from './components/pages/IA';
 import Recherche from './components/pages/Recherche';
 import Profil from './components/pages/Profil';
+import Login from './components/pages/Login'; // 🔥 AJOUT IMPORTANT
 
 // 🎬 Animations
 const pageVariants = {
@@ -30,6 +31,13 @@ function AnimatedRoutes() {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
+
+        {/* 🔐 LOGIN = page d’entrée */}
+        <Route path="/" element={
+          <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
+            <Login />
+          </motion.div>
+        } />
 
         <Route path="/scanner" element={
           <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
@@ -61,10 +69,10 @@ function AnimatedRoutes() {
           </motion.div>
         } />
 
-        {/* Page par défaut */}
+        {/* fallback */}
         <Route path="*" element={
           <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
-            <Scanner />
+            <Login />
           </motion.div>
         } />
 
@@ -78,11 +86,12 @@ function App() {
   return (
     <Router>
       <div className="App">
-        
+
         <main className="main-content">
           <AnimatedRoutes />
         </main>
 
+        {/* ⚠️ IMPORTANT: Navbar cachée sur login */}
         <Navbar />
 
       </div>

@@ -12,7 +12,7 @@ const Navbar = () => {
   return (
     <div className="navbar">
 
-      <div 
+      <div
         className={`nav-item ${isActive("/scanner") ? "active" : ""}`}
         onClick={() => navigate("/scanner")}
       >
@@ -20,7 +20,7 @@ const Navbar = () => {
         <span>Scanner</span>
       </div>
 
-      <div 
+      <div
         className={`nav-item ${isActive("/historique") ? "active" : ""}`}
         onClick={() => navigate("/historique")}
       >
@@ -28,7 +28,7 @@ const Navbar = () => {
         <span>Historique</span>
       </div>
 
-      <div 
+      <div
         className={`nav-item ${isActive("/ia") ? "active" : ""}`}
         onClick={() => navigate("/ia")}
       >
@@ -36,7 +36,7 @@ const Navbar = () => {
         <span>IA</span>
       </div>
 
-      <div 
+      <div
         className={`nav-item ${isActive("/recherche") ? "active" : ""}`}
         onClick={() => navigate("/recherche")}
       >
@@ -44,7 +44,7 @@ const Navbar = () => {
         <span>Recherche</span>
       </div>
 
-      <div 
+      <div
         className={`nav-item ${isActive("/profil") ? "active" : ""}`}
         onClick={() => navigate("/profil")}
       >
