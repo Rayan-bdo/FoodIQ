@@ -10,25 +10,47 @@ export default function Login() {
   const [username, setUsername] = useState("");
 
   const navigate = useNavigate();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  if (!email || !password || (!isLogin && !username)) {
+    alert("Remplis tous les champs !");
+    return;
+  }
 
-    if (email && password) {
-      if (isLogin) {
-        // LOGIN
-        localStorage.setItem("user", JSON.stringify({ email }));
-        navigate("/profil");
-      } else {
-        // REGISTER
-        localStorage.setItem("user", JSON.stringify({ email, username }));
-        navigate("/profil");
-      }
-    } else {
-      alert("Remplis tous les champs !");
+  try {
+    const url = isLogin
+      ? "http://localhost:5000/api/auth/login"
+      : "http://localhost:5000/api/auth/register";
+
+    const body = isLogin
+      ? { email, password }
+      : { name: username, email, password };
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials: "include",
+      body: JSON.stringify(body)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Erreur !");
+      return;
     }
-  };
 
+    alert(data.message);
+    navigate("/profil", { state: data.user });
+
+  } catch (error) {
+    console.error(error);
+    alert("Erreur serveur");
+  }
+};
   return (
     <div className="login-container">
       <div className="login-card">

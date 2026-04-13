@@ -1,16 +1,17 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./Profil.css";
 
 import { FaChartBar, FaCheckCircle, FaStar } from "react-icons/fa";
 
 export default function Profil() {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  // 🔥 récupère le user envoyé depuis Login.jsx
+  const user = location.state;
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
     navigate("/");
   };
 
@@ -31,8 +32,8 @@ export default function Profil() {
 
       {/* 👤 HEADER */}
       <div className="user-header">
-        <h2>👤 {user?.username || "Rayan"}</h2>
-        <p>📧 {user?.email || "rayan@gmail.com"}</p>
+        <h2>👤 {user?.name}</h2>
+        <p>📧 {user?.email}</p>
         <p>📊 Statut : Connecté</p>
       </div>
 
