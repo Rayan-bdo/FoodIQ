@@ -8,12 +8,17 @@ export default function Profil() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 🔥 récupère le user envoyé depuis Login.jsx
+  // s récupère le user envoyé depuis Login.jsx
   const user = location.state;
 
-  const handleLogout = () => {
-    navigate("/");
-  };
+ const handleLogout = async () => {
+  await fetch("http://localhost:5000/api/auth/logout", {
+    method: "POST",
+    credentials: "include"
+  });
+
+  navigate("/");
+};
 
   const stats = {
     scans: 156,

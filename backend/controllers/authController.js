@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 
-// 🔐 LOGIN
+// LOGIN
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -22,7 +22,7 @@ exports.login = async (req, res) => {
       return res.status(401).json({ error: "User not found" });
     }
 
-    // 🔹 comparer mot de passe (bcrypt)
+    // 🔹 comparer mot de passe
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -39,12 +39,12 @@ exports.login = async (req, res) => {
     // 🔹 envoyer cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // ⚠️ true en production (https)
-      sameSite: "Strict"
+      secure: false, //  mettre true en production (HTTPS)
+      sameSite: "Lax" //  IMPORTANT pour CORS
     });
 
     // 🔹 réponse frontend
-    res.status(200).json({
+    return res.status(200).json({
       message: "Login successful",
       user: {
         id: user._id,
@@ -54,14 +54,14 @@ exports.login = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Server error" });
+    console.error("Login error:", error);
+    return res.status(500).json({ error: "Server error" });
   }
 };
 
 
 
-// 📝 REGISTER
+//  REGISTER
 exports.register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -90,8 +90,22 @@ exports.register = async (req, res) => {
 
     await user.save();
 
-    // 🔹 réponse frontend
-    res.status(201).json({
+    //  1. créer token
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    //  2. envoyer cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "Lax"
+    });
+
+    //  3. réponse frontend
+    return res.status(201).json({
       message: "User created",
       user: {
         name: user.name,
@@ -100,7 +114,13 @@ exports.register = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Server error" });
+    console.error("Register error:", error);
+    return res.status(500).json({ error: "Server error" });
   }
+};
+
+//  LOGOUT ( AJOUT IMPORTANT)
+exports.logout = (req, res) => {
+  res.clearCookie("token");
+  return res.json({ message: "Logged out successfully" });
 };
