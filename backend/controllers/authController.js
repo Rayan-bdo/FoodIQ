@@ -1,49 +1,42 @@
-// backend/controllers/authController.js
-
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-
 // LOGIN
 exports.login = async (req, res) => {
+  console.log("Login request received:", req.body);
   try {
     const { email, password } = req.body;
 
-    // 🔹 vérifier champs
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password required" });
     }
 
-    // 🔹 chercher user
     const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(401).json({ error: "User not found" });
     }
 
-    // 🔹 comparer mot de passe
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(401).json({ error: "Wrong password" });
     }
 
-    // 🔹 créer token
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    // 🔹 envoyer cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, //  mettre true en production (HTTPS)
-      sameSite: "Lax" //  IMPORTANT pour CORS
+      secure: true,
+      sameSite: "None",
+      path: "/"
     });
 
-    // 🔹 réponse frontend
     return res.status(200).json({
       message: "Login successful",
       user: {
@@ -59,29 +52,23 @@ exports.login = async (req, res) => {
   }
 };
 
-
-
-//  REGISTER
+// REGISTER
 exports.register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // 🔹 vérifier champs
     if (!name || !email || !password) {
       return res.status(400).json({ error: "All fields required" });
     }
 
-    // 🔹 vérifier si user existe déjà
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       return res.status(400).json({ error: "User already exists" });
     }
 
-    // 🔹 hasher mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 🔹 créer user
     const user = new User({
       name,
       email,
@@ -90,21 +77,19 @@ exports.register = async (req, res) => {
 
     await user.save();
 
-    //  1. créer token
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    //  2. envoyer cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "Lax"
+      secure: true,
+      sameSite: "None",
+      path: "/"
     });
 
-    //  3. réponse frontend
     return res.status(201).json({
       message: "User created",
       user: {
@@ -119,8 +104,13 @@ exports.register = async (req, res) => {
   }
 };
 
-//  LOGOUT ( AJOUT IMPORTANT)
+// LOGOUT
 exports.logout = (req, res) => {
-  res.clearCookie("token");
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: false,
+    sameSite: "None",
+    path: "/"
+  });
   return res.json({ message: "Logged out successfully" });
 };

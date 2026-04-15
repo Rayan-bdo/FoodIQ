@@ -4,7 +4,6 @@ import "./Login.css";
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
@@ -13,6 +12,7 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("SUBMIT CLICKED");
 
     if (!email || !password || (!isLogin && !username)) {
       alert("Remplis tous les champs !");
@@ -20,9 +20,7 @@ export default function Login() {
     }
 
     try {
-      const url = isLogin
-        ? "http://localhost:5000/api/auth/login"
-        : "http://localhost:5000/api/auth/register";
+      const url = isLogin ? "/api/auth/login" : "/api/auth/register";
 
       const body = isLogin
         ? { email, password }
@@ -31,10 +29,10 @@ export default function Login() {
       const response = await fetch(url, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
@@ -44,14 +42,10 @@ export default function Login() {
         return;
       }
 
-      console.log(data.message);
-
-      setTimeout(() => {
-        navigate("/profil");
-      }, 100);
-
+      console.log("SUCCESS:", data);
+      navigate("/profil");
     } catch (error) {
-      console.error(error);
+      console.error("LOGIN ERROR:", error);
       alert("Erreur serveur");
     }
   };
@@ -59,15 +53,14 @@ export default function Login() {
   return (
     <div className="login-container">
       <div className="login-card">
-
         <h2>{isLogin ? "Se connecter" : "S'inscrire"}</h2>
 
-        <form onSubmit={handleSubmit} className="login-form">
-
+        <form className="login-form" onSubmit={handleSubmit}>
           {!isLogin && (
             <input
               type="text"
               placeholder="Nom d'utilisateur"
+              value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
           )}
@@ -75,12 +68,14 @@ export default function Login() {
           <input
             type="email"
             placeholder="Email"
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
 
           <input
             type="password"
             placeholder="Mot de passe"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
 
@@ -97,7 +92,6 @@ export default function Login() {
             ? "Pas de compte ? S'inscrire"
             : "Déjà un compte ? Se connecter"}
         </p>
-
       </div>
     </div>
   );

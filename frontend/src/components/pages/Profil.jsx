@@ -14,7 +14,7 @@ export default function Profil() {
   useEffect(() => {
   const fetchUser = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/auth/profile", {
+      const response = await fetch("/api/auth/profile", {
         method: "GET",
         credentials: "include"
       });
@@ -36,7 +36,7 @@ export default function Profil() {
 }, [navigate]);
 
  const handleLogout = async () => {
-  await fetch("http://localhost:5000/api/auth/logout", {
+  await fetch("/api/auth/logout", {
     method: "POST",
     credentials: "include"
   });
