@@ -32,6 +32,10 @@ app.get("/", (req, res) => {
   res.send("FoodIQ API is running 🚀");
 });
 
+
+const productRoutes = require("./routes/productRoutes");
+app.use("/api", productRoutes);
+
 // Connexion MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))

@@ -1,15 +1,39 @@
-import React from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+
+import { useNavigate} from "react-router-dom";
 import "./Profil.css";
+
+import React, { useEffect, useState } from "react";
 
 import { FaChartBar, FaCheckCircle, FaStar } from "react-icons/fa";
 
 export default function Profil() {
   const navigate = useNavigate();
-  const location = useLocation();
+  const [user, setUser] = useState(null);
+  
 
-  // s récupère le user envoyé depuis Login.jsx
-  const user = location.state;
+  useEffect(() => {
+  const fetchUser = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/profile", {
+        method: "GET",
+        credentials: "include"
+      });
+
+      if (!response.ok) {
+        throw new Error("Not authorized");
+      }
+
+      const data = await response.json();
+      setUser(data);
+
+    } catch (error) {
+      console.error(error);
+      navigate("/"); //  redirige si pas connecté
+    }
+  };
+
+  fetchUser();
+}, [navigate]);
 
  const handleLogout = async () => {
   await fetch("http://localhost:5000/api/auth/logout", {
@@ -35,7 +59,7 @@ export default function Profil() {
   return (
     <div className="profil-container">
 
-      {/* 👤 HEADER */}
+      {/*  HEADER */}
       <div className="user-header">
         <h2>👤 {user?.name}</h2>
         <p>📧 {user?.email}</p>
@@ -65,7 +89,7 @@ export default function Profil() {
 
       </div>
 
-      {/* 📜 HISTORY */}
+      {/*  HISTORY */}
       <div className="history-container">
 
         <div className="history-header">
@@ -91,7 +115,7 @@ export default function Profil() {
 
       </div>
 
-      {/* 🚪 LOGOUT */}
+      {/*  LOGOUT */}
       <button className="logout-btn" onClick={handleLogout}>
         🚪 Déconnexion
       </button>
