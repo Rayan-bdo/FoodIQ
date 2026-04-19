@@ -4,12 +4,17 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './components/navbar/navbar';
 
 // PAGES
-import Scanner from './components/pages/Scanner'; 
+import Scanner from './components/pages/Scanner';
 import Historique from './components/pages/Historique';
 import IA from './components/pages/IA';
 import Recherche from './components/pages/Recherche';
 import Profil from './components/pages/Profil';
-import Login from './components/pages/Login'; // 🔥 AJOUT IMPORTANT
+import Login from './components/pages/Login';
+import Parametres from './components/pages/Parametres';
+
+// 🔥 AJOUT
+import ModifierProfil from './components/pages/ModifierProfil';
+import ChangerMotDePasse from './components/pages/ChangerMotDePasse';
 
 // 🎬 Animations
 const pageVariants = {
@@ -32,7 +37,7 @@ function AnimatedRoutes() {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
 
-        {/* 🔐 LOGIN = page d’entrée */}
+        {/* 🔐 LOGIN */}
         <Route path="/" element={
           <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
             <Login />
@@ -69,6 +74,27 @@ function AnimatedRoutes() {
           </motion.div>
         } />
 
+        {/* ⚙️ PARAMÈTRES */}
+        <Route path="/parametres" element={
+          <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
+            <Parametres />
+          </motion.div>
+        } />
+
+        {/* ✏️ MODIFIER PROFIL */}
+        <Route path="/profil/edit" element={
+          <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
+            <ModifierProfil />
+          </motion.div>
+        } />
+
+        {/* 🔒 CHANGER MOT DE PASSE */}
+        <Route path="/changer-mdp" element={
+          <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
+            <ChangerMotDePasse />
+          </motion.div>
+        } />
+
         {/* fallback */}
         <Route path="*" element={
           <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
@@ -91,7 +117,6 @@ function App() {
           <AnimatedRoutes />
         </main>
 
-        {/* ⚠️ IMPORTANT: Navbar cachée sur login */}
         <Navbar />
 
       </div>
