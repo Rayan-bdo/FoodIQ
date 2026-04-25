@@ -13,15 +13,15 @@ const SCORE_COLORS = {
 };
 
 const NUTRIENTS = [
-  { key: "calories", label: "Calories", unit: "kcal", icon: "🔥", color: "var(--nutrient-calories)" },
-  { key: "proteins", label: "Protéines", unit: "g", icon: "💪", color: "var(--nutrient-protein)" },
-  { key: "carbs", label: "Glucides", unit: "g", icon: "🌾", color: "var(--nutrient-carbs)" },
-  { key: "fat", label: "Lipides", unit: "g", icon: "🫒", color: "var(--nutrient-fat)" },
-  { key: "saturatedFat", label: "Saturées", unit: "g", icon: "🧈", color: "var(--nutrient-fat)" },
-  { key: "sugar", label: "Sucres", unit: "g", icon: "🍬", color: "var(--nutrient-sugar)" },
-  { key: "salt", label: "Sel", unit: "g", icon: "🧂", color: "var(--nutrient-salt)" },
-  { key: "sodium", label: "Sodium", unit: "mg", icon: "⚗️", color: "var(--nutrient-salt)" },
-  { key: "fiber", label: "Fibres", unit: "g", icon: "🥦", color: "var(--nutrient-fiber)" },
+  { key: "calories", label: "Calories", unit: "kcal", icon: "🔥" },
+  { key: "proteins", label: "Protéines", unit: "g", icon: "💪" },
+  { key: "carbs", label: "Glucides", unit: "g", icon: "🌾" },
+  { key: "fat", label: "Lipides", unit: "g", icon: "🫒" },
+  { key: "saturatedFat", label: "Saturées", unit: "g", icon: "🧈" },
+  { key: "sugar", label: "Sucres", unit: "g", icon: "🍬" },
+  { key: "salt", label: "Sel", unit: "g", icon: "🧂" },
+  { key: "sodium", label: "Sodium", unit: "mg", icon: "⚗️" },
+  { key: "fiber", label: "Fibres", unit: "g", icon: "🥦" },
 ];
 
 function formatValue(val, unit) {
@@ -119,7 +119,6 @@ export default function Scanner() {
       setProduct(data);
       setError("");
 
-      /* ✅ SAVE SCAN (AJOUT IMPORTANT POUR HISTORIQUE) */
       await fetch("/api/scans/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -141,7 +140,6 @@ export default function Scanner() {
           fiber: data.fiber,
         }),
       }).catch(() => {});
-
     } catch {
       setError(
         "Produit introuvable. Vérifie le code-barres ou essaie la recherche manuelle."
@@ -196,9 +194,7 @@ export default function Scanner() {
 
   /* ---------- SWITCH CAMERA ---------- */
   const switchCamera = useCallback(() => {
-    setCameraMode((prev) =>
-      prev === "environment" ? "user" : "environment"
-    );
+    setCameraMode((prev) => (prev === "environment" ? "user" : "environment"));
 
     if (isScanning) {
       safeStop();
@@ -222,12 +218,16 @@ export default function Scanner() {
     if (reader) reader.innerHTML = "";
   }, [safeStop]);
 
-  return (
-    <div className="scanner-app">
-      <header className="scanner-header">
-        <h1>Food<span>IQ</span></h1>
+  const hasResult = !!(product || error);
 
-        {(product || error) && (
+  return (
+    <div className={`scanner-app ${hasResult ? "has-result" : ""}`}>
+      <header className="scanner-header">
+        <h1>
+          Food<span>IQ</span>
+        </h1>
+
+        {hasResult && (
           <button className="btn-reset-header" onClick={resetScan}>
             Nouveau scan
           </button>
@@ -254,29 +254,6 @@ export default function Scanner() {
                   <p>Produit détecté</p>
                 </div>
               )}
-            </div>
-
-            <div className="scanner-actions">
-              {!isScanning ? (
-                <button className="btn-scan" onClick={startScanner}>
-                  📷 Scanner
-                </button>
-              ) : (
-                <button className="btn-stop" onClick={stopScanner}>
-                  ⏹️ Arrêter
-                </button>
-              )}
-
-              <button className="btn-switch" onClick={switchCamera}>
-                {cameraMode === "environment" ? "🤳" : "📷"}
-              </button>
-
-              <button
-                className="btn-manual"
-                onClick={() => setShowManual(!showManual)}
-              >
-                ⌨️
-              </button>
             </div>
 
             {showManual && (
@@ -306,10 +283,33 @@ export default function Scanner() {
                 Code : <span>{barcode}</span>
               </p>
             )}
+
+            <div className="scanner-actions">
+              {!isScanning ? (
+                <button className="btn-scan" onClick={startScanner}>
+                  📷 Scanner
+                </button>
+              ) : (
+                <button className="btn-stop" onClick={stopScanner}>
+                  ⏹️ Arrêter
+                </button>
+              )}
+
+              <button className="btn-switch" onClick={switchCamera}>
+                {cameraMode === "environment" ? "🤳" : "📷"}
+              </button>
+
+              <button
+                className="btn-manual"
+                onClick={() => setShowManual(!showManual)}
+              >
+                ⌨️
+              </button>
+            </div>
           </>
         )}
 
-        {isLoading && <p>Analyse...</p>}
+        {isLoading && <p className="loading">Analyse...</p>}
         {product && <ProductResult product={product} />}
         {error && <div className="error-banner">😕 {error}</div>}
       </div>

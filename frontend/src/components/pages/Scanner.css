@@ -33,20 +33,38 @@ body {
 
 /* ================= APP ================= */
 .scanner-app {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background: #000;
+}
+
+/* When a product/error is shown, restore normal layout */
+.scanner-app.has-result {
+  position: static;
   max-width: 480px;
   margin: auto;
   min-height: 100vh;
   padding-bottom: 30px;
+  background: var(--bg);
 }
 
 /* ================= HEADER ================= */
 .scanner-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 14px 16px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0));
+}
+
+.scanner-app.has-result .scanner-header {
   position: sticky;
-  top: 0;
   background: rgba(247, 247, 245, 0.9);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
@@ -55,6 +73,11 @@ body {
 .scanner-header h1 {
   font-size: 1.3rem;
   font-weight: 800;
+  color: #fff;
+}
+
+.scanner-app.has-result .scanner-header h1 {
+  color: var(--text);
 }
 
 .scanner-header span {
@@ -66,24 +89,29 @@ body {
   border: none;
   border-radius: 50px;
   font-weight: 700;
-  background: rgba(46, 204, 113, 0.1);
+  background: rgba(46, 204, 113, 0.15);
   color: var(--primary);
   cursor: pointer;
 }
 
 /* ================= BODY ================= */
 .scanner-body {
+  position: relative;
+}
+
+.scanner-app.has-result .scanner-body {
   padding: 20px 16px;
 }
 
-/* ================= VIEWFINDER ================= */
+/* ================= VIEWFINDER (FULLSCREEN) ================= */
 .scanner-viewfinder {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  border-radius: 24px;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
   background: #000;
+  z-index: 1;
 }
 
 /* camera video */
@@ -93,10 +121,9 @@ body {
 }
 
 #reader video {
-  width: 100%;
-  height: 100%;
+  width: 100% !important;
+  height: 100% !important;
   object-fit: cover;
-  border-radius: 24px;
 }
 
 /* ================= SCAN FRAME ================= */
@@ -104,49 +131,27 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  z-index: 5;
 }
 
 /* corners */
 .corner {
   position: absolute;
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border: 3px solid var(--primary);
 }
 
-.corner.tl {
-  top: 14%;
-  left: 14%;
-  border-right: none;
-  border-bottom: none;
-}
-
-.corner.tr {
-  top: 14%;
-  right: 14%;
-  border-left: none;
-  border-bottom: none;
-}
-
-.corner.bl {
-  bottom: 14%;
-  left: 14%;
-  border-right: none;
-  border-top: none;
-}
-
-.corner.br {
-  bottom: 14%;
-  right: 14%;
-  border-left: none;
-  border-top: none;
-}
+.corner.tl { top: 25%; left: 10%; border-right: none; border-bottom: none; }
+.corner.tr { top: 25%; right: 10%; border-left: none; border-bottom: none; }
+.corner.bl { bottom: 30%; left: 10%; border-right: none; border-top: none; }
+.corner.br { bottom: 30%; right: 10%; border-left: none; border-top: none; }
 
 /* scan line */
 .scan-line {
   position: absolute;
-  left: 14%;
-  right: 14%;
+  left: 10%;
+  right: 10%;
   height: 2px;
   background: linear-gradient(90deg, transparent, var(--primary), transparent);
   animation: scanMove 1.8s infinite ease-in-out;
@@ -154,27 +159,29 @@ body {
 }
 
 @keyframes scanMove {
-  0% { top: 18%; }
-  50% { top: 78%; }
-  100% { top: 18%; }
+  0% { top: 28%; }
+  50% { top: 68%; }
+  100% { top: 28%; }
 }
 
 /* ================= SUCCESS OVERLAY ================= */
 .scan-success {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  background: rgba(46, 204, 113, 0.18);
+  background: rgba(46, 204, 113, 0.25);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   backdrop-filter: blur(6px);
   animation: fadeIn 0.2s ease;
+  z-index: 30;
+  color: #fff;
 }
 
 .scan-success .check {
   font-size: 3rem;
-  color: var(--primary);
+  color: #fff;
   animation: pop 0.4s ease;
 }
 
@@ -189,11 +196,23 @@ body {
   100% { transform: scale(1); }
 }
 
-/* ================= ACTION BUTTONS ================= */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ================= ACTION BUTTONS (OVERLAY BOTTOM) ================= */
 .scanner-actions {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(80px + env(safe-area-inset-bottom));
+  z-index: 20;
   display: flex;
   gap: 10px;
-  margin-top: 16px;
+  padding: 0 16px;
+  max-width: 480px;
+  margin: 0 auto;
 }
 
 .btn-scan,
@@ -202,10 +221,11 @@ body {
 .btn-manual {
   border: none;
   border-radius: var(--radius);
-  padding: 14px;
+  padding: 16px;
   font-weight: 700;
   cursor: pointer;
   transition: 0.2s;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
 }
 
 .btn-scan {
@@ -220,14 +240,10 @@ body {
   color: white;
 }
 
-.btn-switch {
-  width: 55px;
-  background: #eee;
-}
-
+.btn-switch,
 .btn-manual {
   width: 55px;
-  background: #eee;
+  background: rgba(255,255,255,0.92);
 }
 
 .btn-scan:active,
@@ -237,11 +253,18 @@ body {
   transform: scale(0.96);
 }
 
-/* ================= MANUAL INPUT ================= */
+/* ================= MANUAL INPUT (OVERLAY) ================= */
 .manual-form {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(150px + env(safe-area-inset-bottom));
+  z-index: 20;
   display: flex;
   gap: 8px;
-  margin-top: 12px;
+  padding: 0 16px;
+  max-width: 480px;
+  margin: 0 auto;
   animation: slideDown 0.3s ease;
 }
 
@@ -251,6 +274,7 @@ body {
   border-radius: 12px;
   border: 1px solid var(--border);
   outline: none;
+  background: rgba(255,255,255,0.95);
 }
 
 .manual-form button {
@@ -269,10 +293,15 @@ body {
 
 /* ================= BARCODE ================= */
 .barcode-display {
-  margin-top: 10px;
+  position: fixed;
+  bottom: calc(150px + env(safe-area-inset-bottom));
+  left: 0;
+  right: 0;
+  z-index: 15;
   text-align: center;
   font-size: 0.85rem;
-  color: var(--text-muted);
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
 }
 
 /* ================= LOADING ================= */
@@ -302,10 +331,7 @@ body {
   box-shadow: 0 4px 20px rgba(0,0,0,0.06);
 }
 
-.product-header {
-  display: flex;
-  gap: 12px;
-}
+.product-header { display: flex; gap: 12px; }
 
 .product-image {
   width: 90px;
@@ -314,12 +340,8 @@ body {
   border-radius: 14px;
 }
 
-.brand {
-  color: var(--text-muted);
-  font-size: 0.85rem;
-}
+.brand { color: var(--text-muted); font-size: 0.85rem; }
 
-/* nutri */
 .nutri-score {
   display: flex;
   align-items: center;
@@ -344,7 +366,6 @@ body {
 .badge.d { background: var(--nutri-d); }
 .badge.e { background: var(--nutri-e); }
 
-/* nutrients */
 .nutrients-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -360,9 +381,7 @@ body {
   text-align: center;
 }
 
-.nutrient-card .icon {
-  font-size: 1.2rem;
-}
+.nutrient-card .icon { font-size: 1.2rem; }
 
 .label {
   font-size: 0.65rem;
@@ -370,7 +389,4 @@ body {
   margin-top: 4px;
 }
 
-.value {
-  font-weight: 800;
-  margin-top: 4px;
-}
+.value { font-weight: 800; margin-top: 4px; }
