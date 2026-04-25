@@ -27,7 +27,6 @@
 
 body {
   font-family: var(--font);
-  background: var(--bg);
   color: var(--text);
 }
 
@@ -36,10 +35,11 @@ body {
   position: relative;
   width: 100%;
   min-height: 100vh;
-  background: #000;
+
+  /* 🔥 SEUL CHANGEMENT (fond) */
+  background: radial-gradient(circle at center, #0a0f0a 0%, #000 75%);
 }
 
-/* When a product/error is shown, restore normal layout */
 .scanner-app.has-result {
   position: static;
   max-width: 480px;
@@ -94,16 +94,7 @@ body {
   cursor: pointer;
 }
 
-/* ================= BODY ================= */
-.scanner-body {
-  position: relative;
-}
-
-.scanner-app.has-result .scanner-body {
-  padding: 20px 16px;
-}
-
-/* ================= VIEWFINDER (FULLSCREEN) ================= */
+/* ================= VIEWFINDER ================= */
 .scanner-viewfinder {
   position: fixed;
   inset: 0;
@@ -114,7 +105,6 @@ body {
   z-index: 1;
 }
 
-/* camera video */
 #reader {
   width: 100%;
   height: 100%;
@@ -126,7 +116,50 @@ body {
   object-fit: cover;
 }
 
-/* ================= SCAN FRAME ================= */
+/* ================= TOP BUTTONS ================= */
+.btn-top {
+  position: fixed;
+  top: calc(16px + env(safe-area-inset-top));
+  z-index: 25;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: 0.2s;
+}
+
+.btn-top:active {
+  transform: scale(0.92);
+}
+
+.btn-torch {
+  left: 16px;
+}
+
+.btn-torch.active {
+  background: #f0c040;
+  color: #1a1a2e;
+  box-shadow: 0 0 20px rgba(240, 192, 64, 0.7);
+}
+
+.btn-flip {
+  right: 16px;
+}
+
+.btn-manual {
+  right: 80px;
+}
+
+/* ================= SCAN FRAME (VERT AU MILIEU) ================= */
 .scan-frame {
   position: absolute;
   inset: 0;
@@ -134,7 +167,6 @@ body {
   z-index: 5;
 }
 
-/* corners */
 .corner {
   position: absolute;
   width: 36px;
@@ -147,7 +179,6 @@ body {
 .corner.bl { bottom: 30%; left: 10%; border-right: none; border-top: none; }
 .corner.br { bottom: 30%; right: 10%; border-left: none; border-top: none; }
 
-/* scan line */
 .scan-line {
   position: absolute;
   left: 10%;
@@ -164,44 +195,7 @@ body {
   100% { top: 28%; }
 }
 
-/* ================= SUCCESS OVERLAY ================= */
-.scan-success {
-  position: fixed;
-  inset: 0;
-  background: rgba(46, 204, 113, 0.25);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  backdrop-filter: blur(6px);
-  animation: fadeIn 0.2s ease;
-  z-index: 30;
-  color: #fff;
-}
-
-.scan-success .check {
-  font-size: 3rem;
-  color: #fff;
-  animation: pop 0.4s ease;
-}
-
-.scan-success p {
-  margin-top: 8px;
-  font-weight: 800;
-}
-
-@keyframes pop {
-  0% { transform: scale(0); }
-  60% { transform: scale(1.3); }
-  100% { transform: scale(1); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* ================= ACTION BUTTONS (OVERLAY BOTTOM) ================= */
+/* ================= ACTION BUTTONS ================= */
 .scanner-actions {
   position: fixed;
   left: 0;
@@ -209,184 +203,59 @@ body {
   bottom: calc(80px + env(safe-area-inset-bottom));
   z-index: 20;
   display: flex;
-  gap: 10px;
-  padding: 0 16px;
-  max-width: 480px;
-  margin: 0 auto;
+  justify-content: center;
 }
 
 .btn-scan,
-.btn-stop,
-.btn-switch,
-.btn-manual {
+.btn-stop {
+  padding: 14px 20px;
+  border-radius: 12px;
   border: none;
-  border-radius: var(--radius);
-  padding: 16px;
   font-weight: 700;
   cursor: pointer;
-  transition: 0.2s;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
 }
 
 .btn-scan {
-  flex: 1;
   background: var(--primary);
   color: white;
 }
 
 .btn-stop {
-  flex: 1;
   background: var(--danger);
   color: white;
 }
 
-.btn-switch,
-.btn-manual {
-  width: 55px;
-  background: rgba(255,255,255,0.92);
-}
-
-.btn-scan:active,
-.btn-stop:active,
-.btn-switch:active,
-.btn-manual:active {
-  transform: scale(0.96);
-}
-
-/* ================= MANUAL INPUT (OVERLAY) ================= */
+/* ================= MANUAL ================= */
 .manual-form {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: calc(150px + env(safe-area-inset-bottom));
-  z-index: 20;
+  left: 5%;
+  right: 5%;
+  bottom: 120px;
   display: flex;
-  gap: 8px;
-  padding: 0 16px;
-  max-width: 480px;
-  margin: 0 auto;
-  animation: slideDown 0.3s ease;
+  gap: 10px;
 }
 
 .manual-form input {
   flex: 1;
-  padding: 12px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  outline: none;
-  background: rgba(255,255,255,0.95);
-}
-
-.manual-form button {
-  padding: 12px 16px;
+  padding: 10px;
+  border-radius: 10px;
   border: none;
-  border-radius: 12px;
-  background: var(--primary);
-  color: white;
-  font-weight: 700;
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ================= BARCODE ================= */
 .barcode-display {
   position: fixed;
-  bottom: calc(150px + env(safe-area-inset-bottom));
-  left: 0;
-  right: 0;
-  z-index: 15;
+  bottom: 140px;
+  width: 100%;
   text-align: center;
-  font-size: 0.85rem;
-  color: #fff;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
-}
-
-/* ================= LOADING ================= */
-.loading {
-  text-align: center;
-  margin-top: 20px;
-  font-weight: 700;
+  color: white;
 }
 
 /* ================= ERROR ================= */
 .error-banner {
-  margin-top: 16px;
-  padding: 12px;
-  border-radius: 12px;
-  background: rgba(231, 76, 60, 0.1);
-  color: var(--danger);
-  font-weight: 700;
+  position: fixed;
+  bottom: 200px;
+  width: 100%;
   text-align: center;
+  color: red;
 }
-
-/* ================= PRODUCT ================= */
-.product-card {
-  background: var(--card);
-  padding: 18px;
-  border-radius: 20px;
-  margin-top: 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-}
-
-.product-header { display: flex; gap: 12px; }
-
-.product-image {
-  width: 90px;
-  height: 90px;
-  object-fit: cover;
-  border-radius: 14px;
-}
-
-.brand { color: var(--text-muted); font-size: 0.85rem; }
-
-.nutri-score {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-.badge {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: 800;
-  color: white;
-}
-
-.badge.a { background: var(--nutri-a); }
-.badge.b { background: var(--nutri-b); }
-.badge.c { background: var(--nutri-c); }
-.badge.d { background: var(--nutri-d); }
-.badge.e { background: var(--nutri-e); }
-
-.nutrients-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.nutrient-card {
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 10px;
-  text-align: center;
-}
-
-.nutrient-card .icon { font-size: 1.2rem; }
-
-.label {
-  font-size: 0.65rem;
-  color: var(--text-muted);
-  margin-top: 4px;
-}
-
-.value { font-weight: 800; margin-top: 4px; }
