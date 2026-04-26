@@ -44,11 +44,9 @@ function ProductResult({ product }) {
           {product.image && (
             <img src={product.image} alt="" className="product-image" />
           )}
-
           <div>
             <h2>{product.name}</h2>
             <p className="brand">{product.brand}</p>
-
             {ns && (
               <div className="nutri-score">
                 <div className={`badge ${ns}`}>{ns.toUpperCase()}</div>
@@ -90,6 +88,7 @@ export default function Scanner() {
 
   const [lock, setLock] = useState(false);
   const [scanSuccess, setScanSuccess] = useState(false);
+  const [torchOn, setTorchOn] = useState(false);
 
   const scannerRef = useRef(null);
 
@@ -102,6 +101,7 @@ export default function Scanner() {
     } catch (e) {}
     scannerRef.current = null;
     setIsScanning(false);
+    setTorchOn(false);
   }, []);
 
   useEffect(() => {
@@ -111,20 +111,15 @@ export default function Scanner() {
   /* ---------- FETCH PRODUCT ---------- */
   const handleScan = async (code) => {
     setIsLoading(true);
-
     try {
       const res = await fetch(`/api/product/${code}`);
       const data = await res.json();
-
       if (!res.ok) throw new Error();
 
       setProduct(data);
       setError("");
-
-      // Navigate to product analysis page
       navigate(`/produit/${code}`);
 
-      /* ✅ SAVE SCAN (AJOUT IMPORTANT POUR HISTORIQUE) */
       await fetch("/api/scans/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -146,7 +141,6 @@ export default function Scanner() {
           fiber: data.fiber,
         }),
       }).catch(() => {});
-
     } catch {
       setError(
         "Produit introuvable. Vérifie le code-barres ou essaie la recherche manuelle."
@@ -167,16 +161,20 @@ export default function Scanner() {
     const instance = new Html5Qrcode("reader");
     scannerRef.current = instance;
 
+    // qrbox plus large pour couvrir tout l'écran
+    const viewport = Math.min(window.innerWidth, window.innerHeight);
+    const boxW = Math.floor(viewport * 0.85);
+    const boxH = Math.floor(boxW * 0.6);
+
     instance.start(
       { facingMode: cameraMode },
-      { fps: 10, qrbox: { width: 250, height: 150 } },
+      { fps: 10, qrbox: { width: boxW, height: boxH } },
       async (text) => {
         if (lock) return;
         setLock(true);
 
         setBarcode(text);
         setScanSuccess(true);
-
         navigator.vibrate?.(200);
 
         try {
@@ -211,10 +209,23 @@ export default function Scanner() {
     }
   }, [isScanning, safeStop, startScanner]);
 
+  /* ---------- TOGGLE TORCH ---------- */
+  const toggleTorch = useCallback(async () => {
+    try {
+      if (!scannerRef.current) return;
+      const newState = !torchOn;
+      await scannerRef.current.applyVideoConstraints({
+        advanced: [{ torch: newState }],
+      });
+      setTorchOn(newState);
+    } catch (e) {
+      console.warn("Torche non supportée sur cet appareil", e);
+    }
+  }, [torchOn]);
+
   /* ---------- RESET ---------- */
   const resetScan = useCallback(() => {
     safeStop();
-
     setBarcode("");
     setProduct(null);
     setError("");
@@ -229,20 +240,18 @@ export default function Scanner() {
 
   return (
     <div className="scanner-app">
-      <header className="scanner-header">
-        <h1>Food<span>IQ</span></h1>
-
-        {(product || error) && (
+      {(product || error) && (
+        <header className="scanner-header">
           <button className="btn-reset-header" onClick={resetScan}>
             Nouveau scan
           </button>
-        )}
-      </header>
+        </header>
+      )}
 
       <div className="scanner-body">
         {!product && (
           <>
-            <div className="scanner-viewfinder">
+            <div className="scanner-viewfinder fullscreen">
               <div id="reader" />
 
               <div className="scan-frame">
@@ -253,35 +262,52 @@ export default function Scanner() {
                 <div className="scan-line" />
               </div>
 
+              {/* Top-left torch */}
+              <button
+                className={`btn-torch ${torchOn ? "active" : ""}`}
+                onClick={toggleTorch}
+                disabled={!isScanning}
+                aria-label="Lampe torche"
+              >
+                {torchOn ? "🔦" : "💡"}
+              </button>
+
+              {/* Top-right selfie / switch camera */}
+              <button
+                className="btn-switch-top"
+                onClick={switchCamera}
+                aria-label="Changer de caméra"
+              >
+                {cameraMode === "environment" ? "🤳" : "📷"}
+              </button>
+
               {scanSuccess && (
                 <div className="scan-success">
                   <div className="check">✔</div>
                   <p>Produit détecté</p>
                 </div>
               )}
-            </div>
 
-            <div className="scanner-actions">
-              {!isScanning ? (
-                <button className="btn-scan" onClick={startScanner}>
-                  📷 Scanner
+              {/* Bottom actions overlay */}
+              <div className="scanner-actions-overlay">
+                {!isScanning ? (
+                  <button className="btn-scan" onClick={startScanner}>
+                    📷 Scanner
+                  </button>
+                ) : (
+                  <button className="btn-stop" onClick={stopScanner}>
+                    ⏹️ Arrêter
+                  </button>
+                )}
+
+                <button
+                  className="btn-manual"
+                  onClick={() => setShowManual(!showManual)}
+                  aria-label="Saisie manuelle"
+                >
+                  ⌨️
                 </button>
-              ) : (
-                <button className="btn-stop" onClick={stopScanner}>
-                  ⏹️ Arrêter
-                </button>
-              )}
-
-              <button className="btn-switch" onClick={switchCamera}>
-                {cameraMode === "environment" ? "🤳" : "📷"}
-              </button>
-
-              <button
-                className="btn-manual"
-                onClick={() => setShowManual(!showManual)}
-              >
-                ⌨️
-              </button>
+              </div>
             </div>
 
             {showManual && (

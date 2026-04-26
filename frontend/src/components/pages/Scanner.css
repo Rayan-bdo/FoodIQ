@@ -33,16 +33,17 @@ body {
 
 /* ================= APP ================= */
 .scanner-app {
-  max-width: 480px;
-  margin: auto;
+  width: 100%;
   min-height: 100vh;
-  padding-bottom: 30px;
+  margin: 0;
+  padding: 0;
+  background: #000;
 }
 
-/* ================= HEADER ================= */
+/* ================= HEADER (uniquement avec produit/erreur) ================= */
 .scanner-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   padding: 14px 16px;
   position: sticky;
@@ -50,15 +51,7 @@ body {
   background: rgba(247, 247, 245, 0.9);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
-}
-
-.scanner-header h1 {
-  font-size: 1.3rem;
-  font-weight: 800;
-}
-
-.scanner-header span {
-  color: var(--primary);
+  z-index: 20;
 }
 
 .btn-reset-header {
@@ -73,10 +66,29 @@ body {
 
 /* ================= BODY ================= */
 .scanner-body {
-  padding: 20px 16px;
+  padding: 0;
 }
 
-/* ================= VIEWFINDER ================= */
+/* Quand un produit/erreur est affiché, on remet du padding */
+.scanner-app:has(.product-card) .scanner-body,
+.scanner-app:has(.error-banner) .scanner-body {
+  padding: 20px 16px;
+  background: var(--bg);
+}
+
+/* ================= VIEWFINDER FULLSCREEN ================= */
+.scanner-viewfinder.fullscreen {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+  overflow: hidden;
+  background: #000;
+  z-index: 10;
+}
+
+/* fallback non-fullscreen */
 .scanner-viewfinder {
   position: relative;
   width: 100%;
@@ -96,7 +108,7 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 24px;
+  border-radius: 0;
 }
 
 /* ================= SCAN FRAME ================= */
@@ -109,35 +121,35 @@ body {
 /* corners */
 .corner {
   position: absolute;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border: 3px solid var(--primary);
 }
 
 .corner.tl {
-  top: 14%;
-  left: 14%;
+  top: 25%;
+  left: 8%;
   border-right: none;
   border-bottom: none;
 }
 
 .corner.tr {
-  top: 14%;
-  right: 14%;
+  top: 25%;
+  right: 8%;
   border-left: none;
   border-bottom: none;
 }
 
 .corner.bl {
-  bottom: 14%;
-  left: 14%;
+  bottom: 25%;
+  left: 8%;
   border-right: none;
   border-top: none;
 }
 
 .corner.br {
-  bottom: 14%;
-  right: 14%;
+  bottom: 25%;
+  right: 8%;
   border-left: none;
   border-top: none;
 }
@@ -145,8 +157,8 @@ body {
 /* scan line */
 .scan-line {
   position: absolute;
-  left: 14%;
-  right: 14%;
+  left: 8%;
+  right: 8%;
   height: 2px;
   background: linear-gradient(90deg, transparent, var(--primary), transparent);
   animation: scanMove 1.8s infinite ease-in-out;
@@ -154,9 +166,60 @@ body {
 }
 
 @keyframes scanMove {
-  0% { top: 18%; }
-  50% { top: 78%; }
-  100% { top: 18%; }
+  0% { top: 28%; }
+  50% { top: 72%; }
+  100% { top: 28%; }
+}
+
+/* ================= TORCH (haut gauche) ================= */
+.btn-torch {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 1.4rem;
+  cursor: pointer;
+  z-index: 15;
+  backdrop-filter: blur(8px);
+  transition: 0.2s;
+}
+
+.btn-torch.active {
+  background: rgba(255, 220, 80, 0.85);
+  box-shadow: 0 0 16px rgba(255, 220, 80, 0.6);
+}
+
+.btn-torch:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ================= SWITCH CAMERA (haut droite) ================= */
+.btn-switch-top {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 1.4rem;
+  cursor: pointer;
+  z-index: 15;
+  backdrop-filter: blur(8px);
+  transition: 0.2s;
+}
+
+.btn-torch:active,
+.btn-switch-top:active {
+  transform: scale(0.92);
 }
 
 /* ================= SUCCESS OVERLAY ================= */
@@ -170,6 +233,7 @@ body {
   align-items: center;
   backdrop-filter: blur(6px);
   animation: fadeIn 0.2s ease;
+  z-index: 14;
 }
 
 .scan-success .check {
@@ -181,6 +245,7 @@ body {
 .scan-success p {
   margin-top: 8px;
   font-weight: 800;
+  color: #fff;
 }
 
 @keyframes pop {
@@ -189,11 +254,20 @@ body {
   100% { transform: scale(1); }
 }
 
-/* ================= ACTION BUTTONS ================= */
-.scanner-actions {
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ================= ACTION BUTTONS BOTTOM OVERLAY ================= */
+.scanner-actions-overlay {
+  position: absolute;
+  bottom: 30px;
+  left: 20px;
+  right: 20px;
   display: flex;
   gap: 10px;
-  margin-top: 16px;
+  z-index: 15;
 }
 
 .btn-scan,
@@ -202,8 +276,9 @@ body {
 .btn-manual {
   border: none;
   border-radius: var(--radius);
-  padding: 14px;
+  padding: 16px;
   font-weight: 700;
+  font-size: 1rem;
   cursor: pointer;
   transition: 0.2s;
 }
@@ -212,12 +287,14 @@ body {
   flex: 1;
   background: var(--primary);
   color: white;
+  box-shadow: 0 4px 16px rgba(46, 204, 113, 0.4);
 }
 
 .btn-stop {
   flex: 1;
   background: var(--danger);
   color: white;
+  box-shadow: 0 4px 16px rgba(231, 76, 60, 0.4);
 }
 
 .btn-switch {
@@ -226,8 +303,10 @@ body {
 }
 
 .btn-manual {
-  width: 55px;
-  background: #eee;
+  width: 60px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--text);
+  font-size: 1.3rem;
 }
 
 .btn-scan:active,
@@ -239,22 +318,27 @@ body {
 
 /* ================= MANUAL INPUT ================= */
 .manual-form {
+  position: fixed;
+  bottom: 100px;
+  left: 20px;
+  right: 20px;
   display: flex;
   gap: 8px;
-  margin-top: 12px;
   animation: slideDown 0.3s ease;
+  z-index: 16;
 }
 
 .manual-form input {
   flex: 1;
-  padding: 12px;
+  padding: 14px;
   border-radius: 12px;
   border: 1px solid var(--border);
   outline: none;
+  background: #fff;
 }
 
 .manual-form button {
-  padding: 12px 16px;
+  padding: 12px 18px;
   border: none;
   border-radius: 12px;
   background: var(--primary);
@@ -269,10 +353,15 @@ body {
 
 /* ================= BARCODE ================= */
 .barcode-display {
-  margin-top: 10px;
+  position: fixed;
+  bottom: 110px;
+  left: 0;
+  right: 0;
   text-align: center;
   font-size: 0.85rem;
-  color: var(--text-muted);
+  color: #fff;
+  z-index: 15;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
 }
 
 /* ================= LOADING ================= */
