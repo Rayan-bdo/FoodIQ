@@ -1,8 +1,10 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Html5Qrcode } from "html5-qrcode";
+import { useNavigate } from "react-router-dom";
 import "./Scanner.css";
 
 export default function Scanner() {
+  const navigate = useNavigate();
   const [barcode, setBarcode] = useState("");
   const [manualBarcode, setManualBarcode] = useState("");
   const [product, setProduct] = useState(null);
