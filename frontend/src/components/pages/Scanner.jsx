@@ -263,14 +263,15 @@ export default function Scanner() {
               </div>
 
               {/* Top-left torch */}
-              <button
-                className={`btn-torch ${torchOn ? "active" : ""}`}
-                onClick={toggleTorch}
-                disabled={!isScanning}
-                aria-label="Lampe torche"
-              >
-                {torchOn ? "🔦" : "💡"}
-              </button>
+<button
+  className={`btn-torch ${torchOn ? "active" : ""}`}
+  onClick={toggleTorch}
+  disabled={!isScanning}
+  aria-label="Lampe torche"
+>
+  🔦
+</button>
+
 
               {/* Top-right selfie / switch camera */}
               <button
