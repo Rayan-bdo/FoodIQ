@@ -2,9 +2,10 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-// LOGIN
+// ====================== LOGIN ======================
 exports.login = async (req, res) => {
   console.log("Login request received:", req.body);
+
   try {
     const { email, password } = req.body;
 
@@ -32,8 +33,8 @@ exports.login = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "None",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
       path: "/"
     });
 
@@ -52,7 +53,8 @@ exports.login = async (req, res) => {
   }
 };
 
-// REGISTER
+
+// ====================== REGISTER ======================
 exports.register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -85,8 +87,8 @@ exports.register = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "None",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
       path: "/"
     });
 
@@ -104,13 +106,15 @@ exports.register = async (req, res) => {
   }
 };
 
-// LOGOUT
+
+// ====================== LOGOUT ======================
 exports.logout = (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
-    secure: false,
-    sameSite: "None",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Lax",
     path: "/"
   });
+
   return res.json({ message: "Logged out successfully" });
 };
