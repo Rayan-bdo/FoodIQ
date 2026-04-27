@@ -2,8 +2,7 @@ import './App.css';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './components/navbar/navbar';
-import { LanguageProvider } from './translations/LanguageContext';
-
+import { LanguageProvider } from "./translations/LanguageContext";
 
 // PAGES
 import Scanner from './components/pages/Scanner';
