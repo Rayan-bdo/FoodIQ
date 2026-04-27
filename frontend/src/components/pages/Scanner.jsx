@@ -1,10 +1,10 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { useNavigate } from "react-router-dom";
+import { useLang } from "../../translations/LanguageContext";
 import "./Scanner.css";
 
 /* ---------- Helpers ---------- */
-const SCORE_LABELS = { a: "Excellent", b: "Bon", c: "Correct", d: "Médiocre", e: "Mauvais" };
 const SCORE_COLORS = {
   a: "var(--nutri-a)",
   b: "var(--nutri-b)",
@@ -13,17 +13,19 @@ const SCORE_COLORS = {
   e: "var(--nutri-e)",
 };
 
-const NUTRIENTS = [
-  { key: "calories", label: "Calories", unit: "kcal", icon: "🔥", color: "var(--nutrient-calories)" },
-  { key: "proteins", label: "Protéines", unit: "g", icon: "💪", color: "var(--nutrient-protein)" },
-  { key: "carbs", label: "Glucides", unit: "g", icon: "🌾", color: "var(--nutrient-carbs)" },
-  { key: "fat", label: "Lipides", unit: "g", icon: "🫒", color: "var(--nutrient-fat)" },
-  { key: "saturatedFat", label: "Saturées", unit: "g", icon: "🧈", color: "var(--nutrient-fat)" },
-  { key: "sugar", label: "Sucres", unit: "g", icon: "🍬", color: "var(--nutrient-sugar)" },
-  { key: "salt", label: "Sel", unit: "g", icon: "🧂", color: "var(--nutrient-salt)" },
-  { key: "sodium", label: "Sodium", unit: "mg", icon: "⚗️", color: "var(--nutrient-salt)" },
-  { key: "fiber", label: "Fibres", unit: "g", icon: "🥦", color: "var(--nutrient-fiber)" },
-];
+function getNutrients(t) {
+  return [
+    { key: "calories", label: t("calories"), unit: "kcal", icon: "🔥" },
+    { key: "proteins", label: t("proteins"), unit: "g", icon: "💪" },
+    { key: "carbs", label: t("carbs"), unit: "g", icon: "🌾" },
+    { key: "fat", label: t("fat"), unit: "g", icon: "🫒" },
+    { key: "saturatedFat", label: t("saturatedFat"), unit: "g", icon: "🧈" },
+    { key: "sugar", label: t("sugar"), unit: "g", icon: "🍬" },
+    { key: "salt", label: t("salt"), unit: "g", icon: "🧂" },
+    { key: "sodium", label: t("sodium"), unit: "mg", icon: "⚗️" },
+    { key: "fiber", label: t("fiber"), unit: "g", icon: "🥦" },
+  ];
+}
 
 function formatValue(val, unit) {
   if (val == null) return "N/A";
@@ -34,8 +36,11 @@ function formatValue(val, unit) {
 
 /* ---------- Product ---------- */
 function ProductResult({ product }) {
+  const { t } = useLang();
+  const NUTRIENTS = getNutrients(t);
   const nutrients = NUTRIENTS.filter((n) => product[n.key] != null);
   const ns = product.nutriScore?.toLowerCase();
+  const scoreLabels = t("nutriScoreLabels");
 
   return (
     <div style={{ marginTop: 24 }}>
@@ -51,7 +56,7 @@ function ProductResult({ product }) {
               <div className="nutri-score">
                 <div className={`badge ${ns}`}>{ns.toUpperCase()}</div>
                 <span style={{ color: SCORE_COLORS[ns] }}>
-                  {SCORE_LABELS[ns]}
+                  {scoreLabels[ns]}
                 </span>
               </div>
             )}
@@ -77,6 +82,8 @@ function ProductResult({ product }) {
 /* ---------- MAIN ---------- */
 export default function Scanner() {
   const navigate = useNavigate();
+  const { t, lang } = useLang();
+
   const [barcode, setBarcode] = useState("");
   const [manualBarcode, setManualBarcode] = useState("");
   const [product, setProduct] = useState(null);
@@ -85,7 +92,6 @@ export default function Scanner() {
   const [isLoading, setIsLoading] = useState(false);
   const [showManual, setShowManual] = useState(false);
   const [cameraMode, setCameraMode] = useState("environment");
-
   const [lock, setLock] = useState(false);
   const [scanSuccess, setScanSuccess] = useState(false);
   const [torchOn, setTorchOn] = useState(false);
@@ -111,14 +117,23 @@ export default function Scanner() {
   /* ---------- FETCH PRODUCT ---------- */
   const handleScan = async (code) => {
     setIsLoading(true);
-    try {
-      const res = await fetch(`/api/product/${code}`);
-      const data = await res.json();
-      if (!res.ok) throw new Error();
+    setProduct(null);
+    setError("");
+    setBarcode("");
 
+    try {
+      const res = await fetch(`/api/product/${code}?lang=${lang}`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Introuvable");
+
+      setBarcode(code);
       setProduct(data);
       setError("");
-      navigate(`/produit/${code}`);
 
       await fetch("/api/scans/save", {
         method: "POST",
@@ -142,9 +157,9 @@ export default function Scanner() {
         }),
       }).catch(() => {});
     } catch {
-      setError(
-        "Produit introuvable. Vérifie le code-barres ou essaie la recherche manuelle."
-      );
+      setProduct(null);
+      setBarcode("");
+      setError(t("productNotFound"));
     } finally {
       setIsLoading(false);
     }
@@ -161,7 +176,6 @@ export default function Scanner() {
     const instance = new Html5Qrcode("reader");
     scannerRef.current = instance;
 
-    // qrbox plus large pour couvrir tout l'écran
     const viewport = Math.min(window.innerWidth, window.innerHeight);
     const boxW = Math.floor(viewport * 0.85);
     const boxH = Math.floor(boxW * 0.6);
@@ -173,7 +187,6 @@ export default function Scanner() {
         if (lock) return;
         setLock(true);
 
-        setBarcode(text);
         setScanSuccess(true);
         navigator.vibrate?.(200);
 
@@ -202,7 +215,6 @@ export default function Scanner() {
     setCameraMode((prev) =>
       prev === "environment" ? "user" : "environment"
     );
-
     if (isScanning) {
       safeStop();
       setTimeout(() => startScanner(), 300);
@@ -240,10 +252,10 @@ export default function Scanner() {
 
   return (
     <div className="scanner-app">
-      {(product || error) && (
+      {product && (
         <header className="scanner-header">
           <button className="btn-reset-header" onClick={resetScan}>
-            Nouveau scan
+            {t("newScan")}
           </button>
         </header>
       )}
@@ -262,18 +274,15 @@ export default function Scanner() {
                 <div className="scan-line" />
               </div>
 
-              {/* Top-left torch */}
-<button
-  className={`btn-torch ${torchOn ? "active" : ""}`}
-  onClick={toggleTorch}
-  disabled={!isScanning}
-  aria-label="Lampe torche"
->
-  🔦
-</button>
+              <button
+                className={`btn-torch ${torchOn ? "active" : ""}`}
+                onClick={toggleTorch}
+                disabled={!isScanning}
+                aria-label="Lampe torche"
+              >
+                🔦
+              </button>
 
-
-              {/* Top-right selfie / switch camera */}
               <button
                 className="btn-switch-top"
                 onClick={switchCamera}
@@ -285,19 +294,18 @@ export default function Scanner() {
               {scanSuccess && (
                 <div className="scan-success">
                   <div className="check">✔</div>
-                  <p>Produit détecté</p>
+                  <p>{t("productDetected")}</p>
                 </div>
               )}
 
-              {/* Bottom actions overlay */}
               <div className="scanner-actions-overlay">
                 {!isScanning ? (
                   <button className="btn-scan" onClick={startScanner}>
-                    📷 Scanner
+                    📷 {t("scanner")}
                   </button>
                 ) : (
                   <button className="btn-stop" onClick={stopScanner}>
-                    ⏹️ Arrêter
+                    ⏹️ {t("stop")}
                   </button>
                 )}
 
@@ -317,7 +325,6 @@ export default function Scanner() {
                 onSubmit={(e) => {
                   e.preventDefault();
                   if (manualBarcode.trim()) {
-                    setBarcode(manualBarcode);
                     handleScan(manualBarcode);
                     setManualBarcode("");
                     setShowManual(false);
@@ -327,7 +334,7 @@ export default function Scanner() {
                 <input
                   value={manualBarcode}
                   onChange={(e) => setManualBarcode(e.target.value)}
-                  placeholder="Code-barres..."
+                  placeholder={t("barcodePlaceholder")}
                 />
                 <button type="submit">🔍</button>
               </form>
@@ -338,12 +345,43 @@ export default function Scanner() {
                 Code : <span>{barcode}</span>
               </p>
             )}
+
+            {isLoading && (
+              <p
+                style={{
+                  position: "fixed",
+                  bottom: "calc(var(--navbar-height) + 160px)",
+                  left: 0,
+                  right: 0,
+                  textAlign: "center",
+                  color: "#fff",
+                  fontWeight: 700,
+                  zIndex: 20,
+                  textShadow: "0 1px 4px rgba(0,0,0,0.6)",
+                }}
+              >
+                {t("analyzing")}
+              </p>
+            )}
+
+            {error && (
+              <div
+                className="error-banner"
+                style={{
+                  position: "fixed",
+                  bottom: "calc(var(--navbar-height) + 160px)",
+                  left: 16,
+                  right: 16,
+                  zIndex: 20,
+                }}
+              >
+                😕 {error}
+              </div>
+            )}
           </>
         )}
 
-        {isLoading && <p>Analyse...</p>}
         {product && <ProductResult product={product} />}
-        {error && <div className="error-banner">😕 {error}</div>}
       </div>
     </div>
   );

@@ -2,6 +2,8 @@ import './App.css';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './components/navbar/navbar';
+import { LanguageProvider } from './translations/LanguageContext';
+
 
 // PAGES
 import Scanner from './components/pages/Scanner';
@@ -12,7 +14,6 @@ import Profil from './components/pages/Profil';
 import Login from './components/pages/Login';
 import Parametres from './components/pages/Parametres';
 
-// 🔥 AJOUT
 import ModifierProfil from './components/pages/ModifierProfil';
 import ChangerMotDePasse from './components/pages/ChangerMotDePasse';
 
@@ -37,7 +38,6 @@ function AnimatedRoutes() {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
 
-        {/* 🔐 LOGIN */}
         <Route path="/" element={
           <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
             <Login />
@@ -74,28 +74,24 @@ function AnimatedRoutes() {
           </motion.div>
         } />
 
-        {/* ⚙️ PARAMÈTRES */}
         <Route path="/parametres" element={
           <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
             <Parametres />
           </motion.div>
         } />
 
-        {/* ✏️ MODIFIER PROFIL */}
         <Route path="/profil/edit" element={
           <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
             <ModifierProfil />
           </motion.div>
         } />
 
-        {/* 🔒 CHANGER MOT DE PASSE */}
         <Route path="/changer-mdp" element={
           <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
             <ChangerMotDePasse />
           </motion.div>
         } />
 
-        {/* fallback */}
         <Route path="*" element={
           <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
             <Login />
@@ -110,17 +106,16 @@ function AnimatedRoutes() {
 // 🧠 App principale
 function App() {
   return (
-    <Router>
-      <div className="App">
-
-        <main className="main-content">
-          <AnimatedRoutes />
-        </main>
-
-        <Navbar />
-
-      </div>
-    </Router>
+    <LanguageProvider>
+      <Router>
+        <div className="App">
+          <main className="main-content">
+            <AnimatedRoutes />
+          </main>
+          <Navbar />
+        </div>
+      </Router>
+    </LanguageProvider>
   );
 }
 
