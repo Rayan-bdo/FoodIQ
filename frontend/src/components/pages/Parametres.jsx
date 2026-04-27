@@ -13,14 +13,25 @@ import {
   FaSignOutAlt,
   FaChevronRight,
 } from "react-icons/fa";
+import { useLang } from "../../translations/LanguageContext";
 import "./Parametres.css";
 
 export default function Parametres() {
   const navigate = useNavigate();
+  const { lang, setLang, t } = useLang();
   const [user, setUser] = useState(null);
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showLangModal, setShowLangModal] = useState(false);
+
+  const LANGUAGES = [
+    { code: "fr", label: "Français", flag: "🇫🇷" },
+    { code: "en", label: "English", flag: "🇬🇧" },
+    { code: "ar", label: "العربية", flag: "🇲🇦" },
+  ];
+
+  const currentLang = LANGUAGES.find((l) => l.code === lang);
 
   // 🔐 Récup user
   useEffect(() => {
@@ -62,7 +73,7 @@ export default function Parametres() {
         <button className="back-btn" onClick={() => navigate(-1)}>
           <FaArrowLeft />
         </button>
-        <h2>Paramètres</h2>
+        <h2>{t("settings")}</h2>
         <div style={{ width: 36 }} />
       </div>
 
@@ -81,27 +92,17 @@ export default function Parametres() {
       <section className="settings-section">
         <h4 className="settings-section-title">Compte</h4>
         <div className="settings-list">
-          <button
-            className="settings-item"
-            onClick={() => navigate("/profil/edit")}
-          >
+          <button className="settings-item" onClick={() => navigate("/profil/edit")}>
             <div className="settings-item-left">
-              <div className="settings-icon icon-blue">
-                <FaUser />
-              </div>
+              <div className="settings-icon icon-blue"><FaUser /></div>
               <span>Modifier le profil</span>
             </div>
             <FaChevronRight className="chevron" />
           </button>
 
-          <button
-            className="settings-item"
-            onClick={() => navigate("/changer-mdp")}
-          >
+          <button className="settings-item" onClick={() => navigate("/changer-mdp")}>
             <div className="settings-item-left">
-              <div className="settings-icon icon-purple">
-                <FaLock />
-              </div>
+              <div className="settings-icon icon-purple"><FaLock /></div>
               <span>Changer le mot de passe</span>
             </div>
             <FaChevronRight className="chevron" />
@@ -115,47 +116,34 @@ export default function Parametres() {
         <div className="settings-list">
           <div className="settings-item">
             <div className="settings-item-left">
-              <div className="settings-icon icon-orange">
-                <FaBell />
-              </div>
+              <div className="settings-icon icon-orange"><FaBell /></div>
               <span>Notifications</span>
             </div>
             <label className="switch">
-              <input
-                type="checkbox"
-                checked={notifications}
-                onChange={() => setNotifications(!notifications)}
-              />
+              <input type="checkbox" checked={notifications} onChange={() => setNotifications(!notifications)} />
               <span className="slider" />
             </label>
           </div>
 
           <div className="settings-item">
             <div className="settings-item-left">
-              <div className="settings-icon icon-dark">
-                <FaMoon />
-              </div>
+              <div className="settings-icon icon-dark"><FaMoon /></div>
               <span>Mode sombre</span>
             </div>
             <label className="switch">
-              <input
-                type="checkbox"
-                checked={darkMode}
-                onChange={() => setDarkMode(!darkMode)}
-              />
+              <input type="checkbox" checked={darkMode} onChange={() => setDarkMode(!darkMode)} />
               <span className="slider" />
             </label>
           </div>
 
-          <button className="settings-item">
+          {/* 🌍 LANGUE */}
+          <button className="settings-item" onClick={() => setShowLangModal(true)}>
             <div className="settings-item-left">
-              <div className="settings-icon icon-green">
-                <FaLanguage />
-              </div>
-              <span>Langue</span>
+              <div className="settings-icon icon-green"><FaLanguage /></div>
+              <span>{t("language")}</span>
             </div>
             <div className="settings-item-right">
-              <span className="value">Français</span>
+              <span className="value">{currentLang?.flag} {currentLang?.label}</span>
               <FaChevronRight className="chevron" />
             </div>
           </button>
@@ -168,9 +156,7 @@ export default function Parametres() {
         <div className="settings-list">
           <button className="settings-item">
             <div className="settings-item-left">
-              <div className="settings-icon icon-teal">
-                <FaShieldAlt />
-              </div>
+              <div className="settings-icon icon-teal"><FaShieldAlt /></div>
               <span>Politique de confidentialité</span>
             </div>
             <FaChevronRight className="chevron" />
@@ -178,9 +164,7 @@ export default function Parametres() {
 
           <button className="settings-item">
             <div className="settings-item-left">
-              <div className="settings-icon icon-yellow">
-                <FaQuestionCircle />
-              </div>
+              <div className="settings-icon icon-yellow"><FaQuestionCircle /></div>
               <span>Aide & Support</span>
             </div>
             <FaChevronRight className="chevron" />
@@ -188,9 +172,7 @@ export default function Parametres() {
 
           <button className="settings-item">
             <div className="settings-item-left">
-              <div className="settings-icon icon-gray">
-                <FaInfoCircle />
-              </div>
+              <div className="settings-icon icon-gray"><FaInfoCircle /></div>
               <span>À propos</span>
             </div>
             <div className="settings-item-right">
@@ -205,14 +187,9 @@ export default function Parametres() {
       <section className="settings-section">
         <h4 className="settings-section-title danger-title">Zone sensible</h4>
         <div className="settings-list">
-          <button
-            className="settings-item danger"
-            onClick={() => setShowLogoutModal(true)}
-          >
+          <button className="settings-item danger" onClick={() => setShowLogoutModal(true)}>
             <div className="settings-item-left">
-              <div className="settings-icon icon-orange-red">
-                <FaSignOutAlt />
-              </div>
+              <div className="settings-icon icon-orange-red"><FaSignOutAlt /></div>
               <span>Déconnexion</span>
             </div>
             <FaChevronRight className="chevron" />
@@ -220,25 +197,47 @@ export default function Parametres() {
         </div>
       </section>
 
+      {/* 🌍 MODAL LANGUE */}
+      {showLangModal && (
+        <div className="modal-overlay" onClick={() => setShowLangModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-icon" style={{ background: "linear-gradient(135deg, #2ecc71, #27ae60)" }}>
+              <FaLanguage />
+            </div>
+            <h3>{t("language")}</h3>
+            <div className="lang-options">
+              {LANGUAGES.map((l) => (
+                <button
+                  key={l.code}
+                  className={`lang-option ${lang === l.code ? "active" : ""}`}
+                  onClick={() => {
+                    setLang(l.code);
+                    setShowLangModal(false);
+                  }}
+                >
+                  <span className="lang-flag">{l.flag}</span>
+                  <span className="lang-label">{l.label}</span>
+                  {lang === l.code && <span className="lang-check">✓</span>}
+                </button>
+              ))}
+            </div>
+            <button className="btn-secondary" style={{ width: "100%", marginTop: 12 }} onClick={() => setShowLangModal(false)}>
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 🚪 MODAL DÉCONNEXION */}
       {showLogoutModal && (
         <div className="modal-overlay" onClick={() => setShowLogoutModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-icon orange">
-              <FaSignOutAlt />
-            </div>
+            <div className="modal-icon orange"><FaSignOutAlt /></div>
             <h3>Se déconnecter ?</h3>
             <p>Tu devras te reconnecter pour accéder à ton compte.</p>
             <div className="modal-actions">
-              <button
-                className="btn-secondary"
-                onClick={() => setShowLogoutModal(false)}
-              >
-                Annuler
-              </button>
-              <button className="btn-danger" onClick={handleLogout}>
-                Déconnexion
-              </button>
+              <button className="btn-secondary" onClick={() => setShowLogoutModal(false)}>Annuler</button>
+              <button className="btn-danger" onClick={handleLogout}>Déconnexion</button>
             </div>
           </div>
         </div>

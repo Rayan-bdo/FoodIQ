@@ -3,12 +3,13 @@ const router = express.Router();
 
 router.get("/product/:barcode", async (req, res) => {
   const barcode = req.params.barcode;
+  const lang = req.query.lang || "fr"; // ← récupère la langue, "fr" par défaut
 
   try {
-    console.log("BARCODE REÇU :", barcode);
+    console.log("BARCODE REÇU :", barcode, "| LANGUE :", lang);
 
     const response = await fetch(
-      `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`
+      `https://world.openfoodfacts.org/api/v0/product/${barcode}.json?lc=${lang}&fields=product_name,product_name_${lang},brands,image_url,nutri_score_grade,nutriments`
     );
 
     const data = await response.json();
@@ -19,11 +20,16 @@ router.get("/product/:barcode", async (req, res) => {
       return res.status(404).json({ error: "Produit non trouvé" });
     }
 
-    // Accéder aux nutriments correctement
     const nutrients = data.product.nutriments || {};
-    
+
+    // Nom dans la langue demandée, sinon nom générique
+    const name =
+      data.product[`product_name_${lang}`] ||
+      data.product.product_name ||
+      "Nom non disponible";
+
     return res.json({
-      name: data.product.product_name || "Nom non disponible",
+      name,
       brand: data.product.brands || "Marque inconnue",
       image: data.product.image_url || null,
       nutriScore: data.product.nutri_score_grade || null,
