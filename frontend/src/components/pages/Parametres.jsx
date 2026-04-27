@@ -11,7 +11,6 @@ import {
   FaQuestionCircle,
   FaInfoCircle,
   FaSignOutAlt,
-  FaTrash,
   FaChevronRight,
 } from "react-icons/fa";
 import "./Parametres.css";
@@ -22,7 +21,6 @@ export default function Parametres() {
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // 🔐 Récup user
   useEffect(() => {
@@ -50,26 +48,10 @@ export default function Parametres() {
         method: "POST",
         credentials: "include",
       });
+      setUser(null);
       navigate("/");
     } catch (err) {
       console.error("Erreur déconnexion :", err);
-    }
-  };
-
-  // 🗑️ Suppression compte
-  const handleDeleteAccount = async () => {
-    try {
-      const res = await fetch("/api/auth/delete", {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (res.ok) {
-        navigate("/");
-      } else {
-        alert("Erreur lors de la suppression du compte");
-      }
-    } catch (err) {
-      console.error(err);
     }
   };
 
@@ -219,7 +201,7 @@ export default function Parametres() {
         </div>
       </section>
 
-      {/* ⚠️ ZONE DANGER */}
+      {/* 🚪 DÉCONNEXION */}
       <section className="settings-section">
         <h4 className="settings-section-title danger-title">Zone sensible</h4>
         <div className="settings-list">
@@ -235,23 +217,8 @@ export default function Parametres() {
             </div>
             <FaChevronRight className="chevron" />
           </button>
-
-          <button
-            className="settings-item danger"
-            onClick={() => setShowDeleteModal(true)}
-          >
-            <div className="settings-item-left">
-              <div className="settings-icon icon-red">
-                <FaTrash />
-              </div>
-              <span>Supprimer mon compte</span>
-            </div>
-            <FaChevronRight className="chevron" />
-          </button>
         </div>
       </section>
-
-      <p className="footer-text">Fait avec 💚 — ScanNutrition</p>
 
       {/* 🚪 MODAL DÉCONNEXION */}
       {showLogoutModal && (
@@ -271,33 +238,6 @@ export default function Parametres() {
               </button>
               <button className="btn-danger" onClick={handleLogout}>
                 Déconnexion
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 🗑️ MODAL SUPPRESSION */}
-      {showDeleteModal && (
-        <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-icon red">
-              <FaTrash />
-            </div>
-            <h3>Supprimer le compte ?</h3>
-            <p>
-              Cette action est <strong>irréversible</strong>. Toutes tes données
-              seront définitivement supprimées.
-            </p>
-            <div className="modal-actions">
-              <button
-                className="btn-secondary"
-                onClick={() => setShowDeleteModal(false)}
-              >
-                Annuler
-              </button>
-              <button className="btn-danger" onClick={handleDeleteAccount}>
-                Supprimer
               </button>
             </div>
           </div>
