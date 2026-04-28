@@ -7,26 +7,36 @@ import {
   FaCamera,
   FaCheck,
 } from "react-icons/fa";
-import { useLang } from "../../translations/LanguageContext";
 import "./ModifierProfil.css";
 
 export default function ModifierProfil() {
   const navigate = useNavigate();
-  const { t } = useLang();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
-  const [form, setForm] = useState({ name: "", email: "", avatar: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    avatar: "",
+  });
 
+  // 🔐 Récup user
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch("/api/auth/profile", { method: "GET", credentials: "include" });
+        const res = await fetch("/api/auth/profile", {
+          method: "GET",
+          credentials: "include",
+        });
         if (!res.ok) throw new Error("Not authorized");
         const data = await res.json();
-        setForm({ name: data.name || "", email: data.email || "", avatar: data.avatar || "" });
+        setForm({
+          name: data.name || "",
+          email: data.email || "",
+          avatar: data.avatar || "",
+        });
       } catch (err) {
         console.error(err);
         navigate("/");
@@ -48,12 +58,13 @@ export default function ModifierProfil() {
     setError("");
     setSuccess(false);
 
+    // Validation
     if (!form.name.trim() || form.name.length < 2) {
-      setError(t("errorNameMin"));
+      setError("Le nom doit contenir au moins 2 caractères");
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      setError(t("errorEmailInvalid"));
+      setError("Email invalide");
       return;
     }
 
@@ -63,12 +74,16 @@ export default function ModifierProfil() {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: form.name.trim(), email: form.email.trim(), avatar: form.avatar }),
+        body: JSON.stringify({
+          name: form.name.trim(),
+          email: form.email.trim(),
+          avatar: form.avatar,
+        }),
       });
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || t("errorUpdate"));
+        throw new Error(data.error || "Erreur lors de la mise à jour");
       }
 
       setSuccess(true);
@@ -80,14 +95,18 @@ export default function ModifierProfil() {
     }
   };
 
-  if (loading) return <div className="edit-loading">{t("loading")}</div>;
+  if (loading) {
+    return <div className="edit-loading">Chargement…</div>;
+  }
 
   return (
     <div className="edit-container">
       {/* HEADER */}
       <div className="edit-header">
-        <button className="back-btn" onClick={() => navigate(-1)}><FaArrowLeft /></button>
-        <h2>{t("editProfile")}</h2>
+        <button className="back-btn" onClick={() => navigate(-1)}>
+          <FaArrowLeft />
+        </button>
+        <h2>Modifier le profil</h2>
         <div style={{ width: 36 }} />
       </div>
 
@@ -101,15 +120,17 @@ export default function ModifierProfil() {
               form.name.charAt(0).toUpperCase() || "?"
             )}
           </div>
-          <button className="avatar-edit-btn" type="button"><FaCamera /></button>
+          <button className="avatar-edit-btn" type="button">
+            <FaCamera />
+          </button>
         </div>
-        <p className="avatar-hint">{t("avatarHint")}</p>
+        <p className="avatar-hint">Appuie pour changer ta photo</p>
       </div>
 
       {/* FORM */}
       <form onSubmit={handleSubmit} className="edit-form">
         <div className="form-group">
-          <label>{t("fullName")}</label>
+          <label>Nom complet</label>
           <div className="input-wrapper">
             <FaUser className="input-icon" />
             <input
@@ -117,7 +138,7 @@ export default function ModifierProfil() {
               name="name"
               value={form.name}
               onChange={handleChange}
-              placeholder={t("namePlaceholder")}
+              placeholder="Ton nom"
               maxLength={50}
               required
             />
@@ -125,7 +146,7 @@ export default function ModifierProfil() {
         </div>
 
         <div className="form-group">
-          <label>{t("email")}</label>
+          <label>Email</label>
           <div className="input-wrapper">
             <FaEnvelope className="input-icon" />
             <input
@@ -143,12 +164,12 @@ export default function ModifierProfil() {
         {error && <div className="form-error">⚠️ {error}</div>}
         {success && (
           <div className="form-success">
-            <FaCheck /> {t("profileUpdated")}
+            <FaCheck /> Profil mis à jour avec succès !
           </div>
         )}
 
         <button type="submit" className="save-btn" disabled={saving}>
-          {saving ? t("saving") : `💾 ${t("saveChanges")}`}
+          {saving ? "Enregistrement…" : "💾 Enregistrer les modifications"}
         </button>
       </form>
     </div>

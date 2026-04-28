@@ -2,12 +2,10 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./navbar.css";
 import { FaBarcode, FaHistory, FaRobot, FaSearch, FaUser } from "react-icons/fa";
-import { useLang } from "../../translations/LanguageContext";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { t } = useLang();
 
   const isActive = (path) => location.pathname === path;
 
@@ -19,7 +17,7 @@ const Navbar = () => {
         onClick={() => navigate("/scanner")}
       >
         <FaBarcode />
-        <span>{t("navScanner")}</span>
+        <span>Scanner</span>
       </div>
 
       <div
@@ -27,7 +25,7 @@ const Navbar = () => {
         onClick={() => navigate("/historique")}
       >
         <FaHistory />
-        <span>{t("navHistory")}</span>
+        <span>Historique</span>
       </div>
 
       <div
@@ -35,7 +33,7 @@ const Navbar = () => {
         onClick={() => navigate("/ia")}
       >
         <FaRobot />
-        <span>{t("navAI")}</span>
+        <span>IA</span>
       </div>
 
       <div
@@ -43,7 +41,7 @@ const Navbar = () => {
         onClick={() => navigate("/recherche")}
       >
         <FaSearch />
-        <span>{t("navSearch")}</span>
+        <span>Recherche</span>
       </div>
 
       <div
@@ -51,7 +49,7 @@ const Navbar = () => {
         onClick={() => navigate("/profil")}
       >
         <FaUser />
-        <span>{t("navProfile")}</span>
+        <span>Profil</span>
       </div>
 
     </div>
