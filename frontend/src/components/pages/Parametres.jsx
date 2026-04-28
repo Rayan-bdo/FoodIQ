@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import {
   FaArrowLeft, FaUser, FaLock, FaBell, FaMoon, FaLanguage,
   FaShieldAlt, FaQuestionCircle, FaInfoCircle, FaSignOutAlt, FaChevronRight,
+  FaEnvelope, FaHeart,
 } from "react-icons/fa";
 import { useLang } from "../../translations/LanguageContext";
 import "./Parametres.css";
@@ -14,6 +15,9 @@ export default function Parametres() {
   const [notifications, setNotifications] = useState(true);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showLangModal, setShowLangModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showAboutModal, setShowAboutModal] = useState(false);
 
   const LANGUAGES = [
     { code: "fr", label: "Français", flag: "🇫🇷" },
@@ -67,6 +71,7 @@ export default function Parametres() {
         </div>
       </div>
 
+      {/* COMPTE */}
       <section className="settings-section">
         <h4 className="settings-section-title">{t("account")}</h4>
         <div className="settings-list">
@@ -87,6 +92,7 @@ export default function Parametres() {
         </div>
       </section>
 
+      {/* PRÉFÉRENCES */}
       <section className="settings-section">
         <h4 className="settings-section-title">{t("preferences")}</h4>
         <div className="settings-list">
@@ -101,7 +107,6 @@ export default function Parametres() {
             </label>
           </div>
 
-          {/* 🌙 DARK MODE — connecté au contexte */}
           <div className="settings-item">
             <div className="settings-item-left">
               <div className="settings-icon icon-dark"><FaMoon /></div>
@@ -126,24 +131,25 @@ export default function Parametres() {
         </div>
       </section>
 
+      {/* CONFIDENTIALITÉ & AIDE */}
       <section className="settings-section">
         <h4 className="settings-section-title">{t("privacyHelp")}</h4>
         <div className="settings-list">
-          <button className="settings-item">
+          <button className="settings-item" onClick={() => setShowPrivacyModal(true)}>
             <div className="settings-item-left">
               <div className="settings-icon icon-teal"><FaShieldAlt /></div>
               <span>{t("privacyPolicy")}</span>
             </div>
             <FaChevronRight className="chevron" />
           </button>
-          <button className="settings-item">
+          <button className="settings-item" onClick={() => setShowHelpModal(true)}>
             <div className="settings-item-left">
               <div className="settings-icon icon-yellow"><FaQuestionCircle /></div>
               <span>{t("helpSupport")}</span>
             </div>
             <FaChevronRight className="chevron" />
           </button>
-          <button className="settings-item">
+          <button className="settings-item" onClick={() => setShowAboutModal(true)}>
             <div className="settings-item-left">
               <div className="settings-icon icon-gray"><FaInfoCircle /></div>
               <span>{t("about")}</span>
@@ -156,6 +162,7 @@ export default function Parametres() {
         </div>
       </section>
 
+      {/* ZONE SENSIBLE */}
       <section className="settings-section">
         <h4 className="settings-section-title danger-title">{t("dangerZone")}</h4>
         <div className="settings-list">
@@ -169,6 +176,7 @@ export default function Parametres() {
         </div>
       </section>
 
+      {/* ===== MODAL LANGUE ===== */}
       {showLangModal && (
         <div className="modal-overlay" onClick={() => setShowLangModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -196,6 +204,7 @@ export default function Parametres() {
         </div>
       )}
 
+      {/* ===== MODAL DÉCONNEXION ===== */}
       {showLogoutModal && (
         <div className="modal-overlay" onClick={() => setShowLogoutModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -206,6 +215,81 @@ export default function Parametres() {
               <button className="btn-secondary" onClick={() => setShowLogoutModal(false)}>{t("cancel")}</button>
               <button className="btn-danger" onClick={handleLogout}>{t("logout")}</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== MODAL CONFIDENTIALITÉ ===== */}
+      {showPrivacyModal && (
+        <div className="modal-overlay" onClick={() => setShowPrivacyModal(false)}>
+          <div className="modal modal-large" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-icon" style={{ background: "linear-gradient(135deg, #1abc9c, #16a085)" }}>
+              <FaShieldAlt />
+            </div>
+            <h3>{t("privacyPolicy")}</h3>
+            <div className="modal-text-content">
+              <p>🔒 <strong>{t("privacyData")}</strong></p>
+              <p>{t("privacyDataDesc")}</p>
+              <p>📦 <strong>{t("privacyStorage")}</strong></p>
+              <p>{t("privacyStorageDesc")}</p>
+              <p>🚫 <strong>{t("privacyNoShare")}</strong></p>
+              <p>{t("privacyNoShareDesc")}</p>
+            </div>
+            <button className="btn-secondary" style={{ width: "100%", marginTop: 16 }} onClick={() => setShowPrivacyModal(false)}>
+              {t("close")}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ===== MODAL AIDE ===== */}
+      {showHelpModal && (
+        <div className="modal-overlay" onClick={() => setShowHelpModal(false)}>
+          <div className="modal modal-large" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-icon" style={{ background: "linear-gradient(135deg, #f1c40f, #f39c12)" }}>
+              <FaQuestionCircle />
+            </div>
+            <h3>{t("helpSupport")}</h3>
+            <div className="modal-text-content">
+              <p>📷 <strong>{t("helpScan")}</strong></p>
+              <p>{t("helpScanDesc")}</p>
+              <p>🔍 <strong>{t("helpSearch")}</strong></p>
+              <p>{t("helpSearchDesc")}</p>
+              <p>🤖 <strong>{t("helpAI")}</strong></p>
+              <p>{t("helpAIDesc")}</p>
+            </div>
+            <a
+              href="mailto:support@foodiq.app"
+              className="btn-help-contact"
+            >
+              <FaEnvelope /> {t("contactSupport")}
+            </a>
+            <button className="btn-secondary" style={{ width: "100%", marginTop: 10 }} onClick={() => setShowHelpModal(false)}>
+              {t("close")}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ===== MODAL À PROPOS ===== */}
+      {showAboutModal && (
+        <div className="modal-overlay" onClick={() => setShowAboutModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="about-logo">🍎</div>
+            <h3>FoodIQ</h3>
+            <p className="about-version">v1.0.0</p>
+            <p className="about-desc">{t("aboutDesc")}</p>
+            <div className="about-badges">
+              <span className="about-badge">Open Food Facts</span>
+              <span className="about-badge">React</span>
+              <span className="about-badge">Node.js</span>
+            </div>
+            <p className="about-made">
+              {t("madeWith")} <FaHeart style={{ color: "#e74c3c" }} /> {t("by")} Rayan
+            </p>
+            <button className="btn-secondary" style={{ width: "100%", marginTop: 16 }} onClick={() => setShowAboutModal(false)}>
+              {t("close")}
+            </button>
           </div>
         </div>
       )}

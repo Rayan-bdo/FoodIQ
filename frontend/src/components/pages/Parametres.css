@@ -283,3 +283,102 @@
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+/* Ajoute ces styles à la fin de ton Parametres.css */
+
+/* ===== MODAL LARGE ===== */
+.modal-large {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* ===== TEXTE DANS LES MODALS ===== */
+.modal-text-content {
+  text-align: left;
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-text-content p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.modal-text-content p strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* ===== BOUTON CONTACT ===== */
+.btn-help-contact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 13px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f1c40f, #f39c12);
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: var(--font);
+  transition: transform 0.15s ease;
+}
+.btn-help-contact:active { transform: scale(0.96); }
+
+/* ===== À PROPOS ===== */
+.about-logo {
+  font-size: 52px;
+  margin-bottom: 8px;
+}
+
+.about-version {
+  font-size: 13px;
+  color: var(--text-soft);
+  font-weight: 700;
+  margin: 0 0 10px !important;
+}
+
+.about-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0 0 14px !important;
+}
+
+.about-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.about-badge {
+  background: var(--card2);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+
+.about-made {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin: 0 !important;
+}
