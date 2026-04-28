@@ -1,39 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
-
-:root {
-  --nutri-a: #2ecc71;
-  --nutri-b: #87d068;
-  --nutri-c: #f0c040;
-  --nutri-d: #e67e22;
-  --nutri-e: #e74c3c;
-
-  --bg: #f7f7f5;
-  --card: #ffffff;
-  --text: #1a1a2e;
-  --text-muted: #8a8a9a;
-  --border: #ececec;
-  --primary: #2ecc71;
-  --danger: #e74c3c;
-
-  --radius: 16px;
-  --font: 'Nunito', sans-serif;
-
-  --navbar-height: 70px;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: var(--font);
-  background: var(--bg);
-  color: var(--text);
-}
-
-/* ================= APP ================= */
 .scanner-app {
   width: 100%;
   min-height: 100vh;
@@ -42,7 +6,6 @@ body {
   background: #000;
 }
 
-/* ================= HEADER ================= */
 .scanner-header {
   display: flex;
   justify-content: flex-end;
@@ -50,9 +13,9 @@ body {
   padding: 14px 16px;
   position: sticky;
   top: 0;
-  background: rgba(247, 247, 245, 0.9);
+  background: var(--bg);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border2);
   z-index: 20;
 }
 
@@ -66,10 +29,7 @@ body {
   cursor: pointer;
 }
 
-/* ================= BODY ================= */
-.scanner-body {
-  padding: 0;
-}
+.scanner-body { padding: 0; }
 
 .scanner-app:has(.product-card) .scanner-body,
 .scanner-app:has(.error-banner) .scanner-body {
@@ -77,7 +37,6 @@ body {
   background: var(--bg);
 }
 
-/* ================= VIEWFINDER FULLSCREEN ================= */
 .scanner-viewfinder.fullscreen {
   position: fixed;
   inset: 0;
@@ -98,24 +57,10 @@ body {
   background: #000;
 }
 
-#reader {
-  width: 100%;
-  height: 100%;
-}
+#reader { width: 100%; height: 100%; }
+#reader video { width: 100%; height: 100%; object-fit: cover; border-radius: 0; }
 
-#reader video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 0;
-}
-
-/* ================= SCAN FRAME ================= */
-.scan-frame {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
+.scan-frame { position: absolute; inset: 0; pointer-events: none; }
 
 .corner {
   position: absolute;
@@ -131,8 +76,7 @@ body {
 
 .scan-line {
   position: absolute;
-  left: 8%;
-  right: 8%;
+  left: 8%; right: 8%;
   height: 2px;
   background: linear-gradient(90deg, transparent, var(--primary), transparent);
   animation: scanMove 1.8s infinite ease-in-out;
@@ -140,18 +84,15 @@ body {
 }
 
 @keyframes scanMove {
-  0% { top: 28%; }
-  50% { top: 72%; }
+  0%   { top: 28%; }
+  50%  { top: 72%; }
   100% { top: 28%; }
 }
 
-/* ================= TORCH (haut gauche) ================= */
 .btn-torch {
   position: absolute;
-  top: 20px;
-  left: 20px;
-  width: 50px;
-  height: 50px;
+  top: 20px; left: 20px;
+  width: 50px; height: 50px;
   border-radius: 50%;
   border: none;
   background: rgba(0, 0, 0, 0.5);
@@ -162,24 +103,16 @@ body {
   backdrop-filter: blur(8px);
   transition: 0.2s;
 }
-
 .btn-torch.active {
   background: rgba(255, 220, 80, 0.85);
   box-shadow: 0 0 16px rgba(255, 220, 80, 0.6);
 }
+.btn-torch:disabled { opacity: 0.4; cursor: not-allowed; }
 
-.btn-torch:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-/* ================= SWITCH CAMERA (haut droite) ================= */
 .btn-switch-top {
   position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 50px;
-  height: 50px;
+  top: 20px; right: 20px;
+  width: 50px; height: 50px;
   border-radius: 50%;
   border: none;
   background: rgba(0, 0, 0, 0.5);
@@ -190,13 +123,8 @@ body {
   backdrop-filter: blur(8px);
   transition: 0.2s;
 }
+.btn-torch:active, .btn-switch-top:active { transform: scale(0.92); }
 
-.btn-torch:active,
-.btn-switch-top:active {
-  transform: scale(0.92);
-}
-
-/* ================= SUCCESS OVERLAY ================= */
 .scan-success {
   position: absolute;
   inset: 0;
@@ -209,36 +137,20 @@ body {
   animation: fadeIn 0.2s ease;
   z-index: 14;
 }
-
-.scan-success .check {
-  font-size: 3rem;
-  color: var(--primary);
-  animation: pop 0.4s ease;
-}
-
-.scan-success p {
-  margin-top: 8px;
-  font-weight: 800;
-  color: #fff;
-}
+.scan-success .check { font-size: 3rem; color: var(--primary); animation: pop 0.4s ease; }
+.scan-success p { margin-top: 8px; font-weight: 800; color: #fff; }
 
 @keyframes pop {
-  0% { transform: scale(0); }
-  60% { transform: scale(1.3); }
+  0%   { transform: scale(0); }
+  60%  { transform: scale(1.3); }
   100% { transform: scale(1); }
 }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* ================= ACTION BUTTONS BOTTOM OVERLAY ================= */
 .scanner-actions-overlay {
   position: fixed;
   bottom: calc(var(--navbar-height) + 20px);
-  left: 0;
-  right: 0;
+  left: 0; right: 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -246,10 +158,7 @@ body {
   z-index: 15;
 }
 
-.btn-scan,
-.btn-stop,
-.btn-switch,
-.btn-manual {
+.btn-scan, .btn-stop, .btn-switch, .btn-manual {
   border: none;
   border-radius: var(--radius);
   font-weight: 700;
@@ -259,8 +168,7 @@ body {
 }
 
 .btn-scan {
-  flex: none;
-  width: auto;
+  flex: none; width: auto;
   padding: 12px 22px;
   background: var(--primary);
   color: white;
@@ -269,8 +177,7 @@ body {
 }
 
 .btn-stop {
-  flex: none;
-  width: auto;
+  flex: none; width: auto;
   padding: 12px 22px;
   background: var(--danger);
   color: white;
@@ -279,8 +186,7 @@ body {
 }
 
 .btn-switch {
-  width: 50px;
-  height: 50px;
+  width: 50px; height: 50px;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.5);
   color: #fff;
@@ -288,8 +194,7 @@ body {
 }
 
 .btn-manual {
-  width: 50px;
-  height: 50px;
+  width: 50px; height: 50px;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.5);
   color: #fff;
@@ -297,14 +202,8 @@ body {
   backdrop-filter: blur(8px);
 }
 
-.btn-scan:active,
-.btn-stop:active,
-.btn-switch:active,
-.btn-manual:active {
-  transform: scale(0.92);
-}
+.btn-scan:active, .btn-stop:active, .btn-switch:active, .btn-manual:active { transform: scale(0.92); }
 
-/* ================= MANUAL INPUT ================= */
 .manual-form {
   position: fixed;
   bottom: calc(var(--navbar-height) + 95px);
@@ -322,9 +221,10 @@ body {
   flex: 1;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border2);
   outline: none;
-  background: #fff;
+  background: var(--input-bg);
+  color: var(--text);
   font-size: 0.82rem;
 }
 
@@ -340,15 +240,13 @@ body {
 
 @keyframes slideDown {
   from { opacity: 0; transform: translateX(-50%) translateY(-5px); }
-  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
-/* ================= BARCODE ================= */
 .barcode-display {
   position: fixed;
   bottom: calc(var(--navbar-height) + 105px);
-  left: 0;
-  right: 0;
+  left: 0; right: 0;
   text-align: center;
   font-size: 0.85rem;
   color: #fff;
@@ -356,14 +254,6 @@ body {
   text-shadow: 0 1px 4px rgba(0,0,0,0.6);
 }
 
-/* ================= LOADING ================= */
-.loading {
-  text-align: center;
-  margin-top: 20px;
-  font-weight: 700;
-}
-
-/* ================= ERROR ================= */
 .error-banner {
   margin-top: 16px;
   padding: 12px;
@@ -374,43 +264,24 @@ body {
   text-align: center;
 }
 
-/* ================= PRODUCT ================= */
 .product-card {
   background: var(--card);
   padding: 18px;
   border-radius: 20px;
   margin-top: 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 20px var(--shadow);
 }
 
-.product-header {
-  display: flex;
-  gap: 12px;
-}
+.product-header { display: flex; gap: 12px; }
 
-.product-image {
-  width: 90px;
-  height: 90px;
-  object-fit: cover;
-  border-radius: 14px;
-}
+.product-image { width: 90px; height: 90px; object-fit: cover; border-radius: 14px; }
 
-.brand {
-  color: var(--text-muted);
-  font-size: 0.85rem;
-}
+.brand { color: var(--text-muted); font-size: 0.85rem; }
 
-/* nutri */
-.nutri-score {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 8px;
-}
+.nutri-score { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
 
 .badge {
-  width: 45px;
-  height: 45px;
+  width: 45px; height: 45px;
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -425,7 +296,6 @@ body {
 .badge.d { background: var(--nutri-d); }
 .badge.e { background: var(--nutri-e); }
 
-/* nutrients */
 .nutrients-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -434,24 +304,13 @@ body {
 }
 
 .nutrient-card {
-  background: white;
-  border: 1px solid var(--border);
+  background: var(--card);
+  border: 1px solid var(--border2);
   border-radius: 14px;
   padding: 10px;
   text-align: center;
 }
 
-.nutrient-card .icon {
-  font-size: 1.2rem;
-}
-
-.label {
-  font-size: 0.65rem;
-  color: var(--text-muted);
-  margin-top: 4px;
-}
-
-.value {
-  font-weight: 800;
-  margin-top: 4px;
-}
+.nutrient-card .icon { font-size: 1.2rem; }
+.label { font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; }
+.value { font-weight: 800; margin-top: 4px; color: var(--text); }

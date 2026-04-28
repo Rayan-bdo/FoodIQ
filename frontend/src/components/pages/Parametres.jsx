@@ -1,27 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import {
-  FaArrowLeft,
-  FaUser,
-  FaLock,
-  FaBell,
-  FaMoon,
-  FaLanguage,
-  FaShieldAlt,
-  FaQuestionCircle,
-  FaInfoCircle,
-  FaSignOutAlt,
-  FaChevronRight,
+  FaArrowLeft, FaUser, FaLock, FaBell, FaMoon, FaLanguage,
+  FaShieldAlt, FaQuestionCircle, FaInfoCircle, FaSignOutAlt, FaChevronRight,
 } from "react-icons/fa";
 import { useLang } from "../../translations/LanguageContext";
 import "./Parametres.css";
 
 export default function Parametres() {
   const navigate = useNavigate();
-  const { lang, setLang, t } = useLang();
+  const { lang, setLang, t, darkMode, setDarkMode } = useLang();
   const [user, setUser] = useState(null);
   const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showLangModal, setShowLangModal] = useState(false);
 
@@ -36,10 +26,7 @@ export default function Parametres() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch("/api/auth/profile", {
-          method: "GET",
-          credentials: "include",
-        });
+        const response = await fetch("/api/auth/profile", { method: "GET", credentials: "include" });
         if (!response.ok) throw new Error("Not authorized");
         const data = await response.json();
         setUser(data);
@@ -64,16 +51,12 @@ export default function Parametres() {
   return (
     <div className="parametres-container">
 
-      {/* HEADER */}
       <div className="parametres-header">
-        <button className="back-btn" onClick={() => navigate(-1)}>
-          <FaArrowLeft />
-        </button>
+        <button className="back-btn" onClick={() => navigate(-1)}><FaArrowLeft /></button>
         <h2>{t("settings")}</h2>
         <div style={{ width: 36 }} />
       </div>
 
-      {/* USER CARD */}
       <div className="user-card">
         <div className="user-avatar">
           {user?.name ? user.name.charAt(0).toUpperCase() : "?"}
@@ -84,7 +67,6 @@ export default function Parametres() {
         </div>
       </div>
 
-      {/* COMPTE */}
       <section className="settings-section">
         <h4 className="settings-section-title">{t("account")}</h4>
         <div className="settings-list">
@@ -95,7 +77,6 @@ export default function Parametres() {
             </div>
             <FaChevronRight className="chevron" />
           </button>
-
           <button className="settings-item" onClick={() => navigate("/changer-mdp")}>
             <div className="settings-item-left">
               <div className="settings-icon icon-purple"><FaLock /></div>
@@ -106,7 +87,6 @@ export default function Parametres() {
         </div>
       </section>
 
-      {/* PRÉFÉRENCES */}
       <section className="settings-section">
         <h4 className="settings-section-title">{t("preferences")}</h4>
         <div className="settings-list">
@@ -121,6 +101,7 @@ export default function Parametres() {
             </label>
           </div>
 
+          {/* 🌙 DARK MODE — connecté au contexte */}
           <div className="settings-item">
             <div className="settings-item-left">
               <div className="settings-icon icon-dark"><FaMoon /></div>
@@ -145,7 +126,6 @@ export default function Parametres() {
         </div>
       </section>
 
-      {/* CONFIDENTIALITÉ & AIDE */}
       <section className="settings-section">
         <h4 className="settings-section-title">{t("privacyHelp")}</h4>
         <div className="settings-list">
@@ -156,7 +136,6 @@ export default function Parametres() {
             </div>
             <FaChevronRight className="chevron" />
           </button>
-
           <button className="settings-item">
             <div className="settings-item-left">
               <div className="settings-icon icon-yellow"><FaQuestionCircle /></div>
@@ -164,7 +143,6 @@ export default function Parametres() {
             </div>
             <FaChevronRight className="chevron" />
           </button>
-
           <button className="settings-item">
             <div className="settings-item-left">
               <div className="settings-icon icon-gray"><FaInfoCircle /></div>
@@ -178,7 +156,6 @@ export default function Parametres() {
         </div>
       </section>
 
-      {/* ZONE SENSIBLE */}
       <section className="settings-section">
         <h4 className="settings-section-title danger-title">{t("dangerZone")}</h4>
         <div className="settings-list">
@@ -192,7 +169,6 @@ export default function Parametres() {
         </div>
       </section>
 
-      {/* MODAL LANGUE */}
       {showLangModal && (
         <div className="modal-overlay" onClick={() => setShowLangModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -220,7 +196,6 @@ export default function Parametres() {
         </div>
       )}
 
-      {/* MODAL DÉCONNEXION */}
       {showLogoutModal && (
         <div className="modal-overlay" onClick={() => setShowLogoutModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>

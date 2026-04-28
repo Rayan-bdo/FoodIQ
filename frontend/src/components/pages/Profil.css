@@ -1,19 +1,17 @@
-/* ========== CONTAINER ========== */
 .profil-container {
   padding: 20px;
   padding-bottom: 110px;
-  background: linear-gradient(180deg, #f0f4f8 0%, #e8f5ee 100%);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
   min-height: 100vh;
   box-sizing: border-box;
-  font-family: "Nunito", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font);
 }
 
-/* ========== HEADER PROFIL ========== */
 .profil-header {
   display: flex;
   align-items: center;
   gap: 15px;
-  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   padding: 20px;
   border-radius: 20px;
   margin-bottom: 25px;
@@ -35,17 +33,8 @@
   border: 3px solid rgba(255, 255, 255, 0.4);
 }
 
-.profil-info h2 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.profil-info p {
-  margin: 4px 0;
-  font-size: 13px;
-  opacity: 0.9;
-}
+.profil-info h2 { margin: 0; font-size: 20px; font-weight: 700; }
+.profil-info p  { margin: 4px 0; font-size: 13px; opacity: 0.9; }
 
 .status-badge {
   display: inline-block;
@@ -57,19 +46,16 @@
   margin-top: 4px;
 }
 
-/* ========== SECTIONS ========== */
-.section {
-  margin-bottom: 25px;
-}
+.section { margin-bottom: 25px; }
 
 .section-title {
   margin: 0 0 12px 4px;
   font-size: 16px;
   font-weight: 700;
-  color: #2c3e50;
+  color: var(--text);
 }
 
-/* ========== STATS ========== */
+/* STATS */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -77,48 +63,44 @@
 }
 
 .stat-card {
-  background: white;
+  background: var(--card);
   padding: 16px 8px;
   border-radius: 16px;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px var(--shadow);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .stat-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 20px var(--shadow-md);
 }
 
-.stat-icon {
-  font-size: 22px;
-  margin-bottom: 6px;
-}
-
-.stat-icon.blue   { color: #3498db; }
-.stat-icon.green  { color: #2ecc71; }
-.stat-icon.red    { color: #e74c3c; }
+.stat-icon { font-size: 22px; margin-bottom: 6px; }
+.stat-icon.blue  { color: #3498db; }
+.stat-icon.green { color: var(--primary); }
+.stat-icon.red   { color: var(--danger); }
 
 .stat-card h3 {
   margin: 4px 0;
   font-size: 22px;
   font-weight: 800;
-  color: #2c3e50;
+  color: var(--text);
 }
 
 .stat-card p {
   margin: 0;
   font-size: 11px;
-  color: #7f8c8d;
+  color: var(--text-muted);
   font-weight: 600;
 }
 
-/* ========== NUTRI-SCORE GRAPH ========== */
+/* NUTRI */
 .nutri-card {
-  background: white;
+  background: var(--card);
   padding: 18px;
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px var(--shadow);
 }
 
 .nutri-row {
@@ -127,10 +109,7 @@
   gap: 12px;
   margin-bottom: 10px;
 }
-
-.nutri-row:last-child {
-  margin-bottom: 0;
-}
+.nutri-row:last-child { margin-bottom: 0; }
 
 .nutri-badge {
   width: 32px;
@@ -154,17 +133,12 @@
 .nutri-bar {
   flex: 1;
   height: 10px;
-  background: #ecf0f1;
+  background: var(--border);
   border-radius: 6px;
   overflow: hidden;
 }
 
-.nutri-fill {
-  height: 100%;
-  border-radius: 6px;
-  transition: width 0.6s ease;
-}
-
+.nutri-fill { height: 100%; border-radius: 6px; transition: width 0.6s ease; }
 .nutri-fill-a { background: linear-gradient(90deg, #1e8f4e, #2ecc71); }
 .nutri-fill-b { background: linear-gradient(90deg, #85bb2f, #a8d34d); }
 .nutri-fill-c { background: linear-gradient(90deg, #f9b233, #ffd166); }
@@ -176,94 +150,69 @@
   text-align: right;
   font-size: 13px;
   font-weight: 700;
-  color: #2c3e50;
+  color: var(--text);
 }
 
-/* ========== DERNIER SCAN ========== */
+/* DERNIER SCAN */
 .last-scan-card {
   display: flex;
   align-items: center;
   gap: 14px;
-  background: white;
+  background: var(--card);
   padding: 14px;
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px var(--shadow);
   transition: transform 0.2s ease;
 }
-
-.last-scan-card:hover {
-  transform: translateY(-2px);
-}
+.last-scan-card:hover { transform: translateY(-2px); }
 
 .last-scan-icon {
   width: 55px;
   height: 55px;
   border-radius: 12px;
-  background: #f0f4f8;
+  background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  color: #2ecc71;
+  color: var(--primary);
   overflow: hidden;
   flex-shrink: 0;
 }
+.last-scan-icon img { width: 100%; height: 100%; object-fit: cover; }
 
-.last-scan-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.last-scan-info {
-  flex: 1;
-  min-width: 0;
-}
-
+.last-scan-info { flex: 1; min-width: 0; }
 .last-scan-info h4 {
   margin: 0;
   font-size: 15px;
   font-weight: 700;
-  color: #2c3e50;
+  color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.last-scan-info p { margin: 3px 0 0; font-size: 12px; color: var(--text-muted); }
 
-.last-scan-info p {
-  margin: 3px 0 0;
-  font-size: 12px;
-  color: #7f8c8d;
-}
-
-.last-scan-score {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.last-scan-emoji {
-  font-size: 18px;
-}
+.last-scan-score { display: flex; align-items: center; gap: 6px; }
+.last-scan-emoji { font-size: 18px; }
 
 .last-scan-empty {
-  background: white;
+  background: var(--card);
   padding: 24px;
   border-radius: 16px;
   text-align: center;
-  color: #95a5a6;
+  color: var(--text-soft);
   font-size: 14px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px var(--shadow);
 }
-
 .last-scan-empty svg {
   font-size: 28px;
   display: block;
   margin: 0 auto 8px;
-  color: #bdc3c7;
+  color: var(--text-soft);
 }
 
-/* ========== BOUTON PARAMÈTRES ========== */
+/* SETTINGS BTN */
 .settings-btn {
   width: 100%;
   padding: 16px;
@@ -282,16 +231,8 @@
   box-shadow: 0 6px 18px rgba(44, 62, 80, 0.25);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
 .settings-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 24px rgba(44, 62, 80, 0.35);
 }
-
-.settings-btn:active {
-  transform: translateY(0);
-}
-
-.settings-btn svg {
-  font-size: 18px;
-}
+.settings-btn svg { font-size: 18px; }

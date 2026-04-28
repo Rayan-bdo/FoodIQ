@@ -1,14 +1,12 @@
-/* ========== CONTAINER ========== */
 .historique-container {
   padding: 20px;
   padding-bottom: 110px;
-  background: linear-gradient(180deg, #f0f4f8 0%, #e8f5ee 100%);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
   min-height: 100vh;
   box-sizing: border-box;
-  font-family: "Nunito", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font);
 }
 
-/* ========== HEADER ========== */
 .historique-header {
   display: flex;
   align-items: center;
@@ -20,11 +18,11 @@
   margin: 0;
   font-size: 20px;
   font-weight: 800;
-  color: #2c3e50;
+  color: var(--text);
 }
 
 .historique-count {
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: white;
   padding: 5px 12px;
   border-radius: 20px;
@@ -33,7 +31,6 @@
   box-shadow: 0 2px 8px rgba(46, 204, 113, 0.3);
 }
 
-/* ========== LOADING ========== */
 .historique-loading {
   display: flex;
   flex-direction: column;
@@ -41,27 +38,24 @@
   justify-content: center;
   padding: 60px 20px;
   gap: 16px;
-  color: #7f8c8d;
+  color: var(--text-muted);
   font-weight: 600;
 }
 
 .loading-spinner {
   width: 36px;
   height: 36px;
-  border: 3px solid #ecf0f1;
-  border-top-color: #2ecc71;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* ========== ERROR ========== */
 .historique-error {
   background: rgba(231, 76, 60, 0.08);
-  color: #e74c3c;
+  color: var(--danger);
   padding: 16px;
   border-radius: 14px;
   text-align: center;
@@ -69,55 +63,43 @@
   margin-top: 20px;
 }
 
-/* ========== EMPTY STATE ========== */
 .historique-empty {
-  background: white;
+  background: var(--card);
   padding: 48px 24px;
   border-radius: 20px;
   text-align: center;
-  color: #95a5a6;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  color: var(--text-soft);
+  box-shadow: 0 4px 12px var(--shadow);
   margin-top: 10px;
 }
 
 .empty-icon {
   font-size: 48px;
-  color: #bdc3c7;
+  color: var(--text-soft);
   margin-bottom: 14px;
   display: block;
   margin-left: auto;
   margin-right: auto;
 }
 
-.historique-empty p {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-}
+.historique-empty p { margin: 0; font-size: 15px; font-weight: 600; }
 
-/* ========== LIST ========== */
-.historique-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
+.historique-list { display: flex; flex-direction: column; gap: 12px; }
 
-/* ========== SCAN CARD ========== */
 .scan-card {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: white;
+  background: var(--card);
   padding: 14px;
   border-radius: 18px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px var(--shadow);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   animation: fadeSlideIn 0.3s ease both;
 }
-
 .scan-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 20px var(--shadow-md);
 }
 
 @keyframes fadeSlideIn {
@@ -125,76 +107,47 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ========== SCAN IMAGE ========== */
 .scan-image {
   width: 62px;
   height: 62px;
   border-radius: 14px;
-  background: #f0f4f8;
+  background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   flex-shrink: 0;
 }
+.scan-image img { width: 100%; height: 100%; object-fit: cover; }
 
-.scan-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+.scan-placeholder-icon { font-size: 24px; color: var(--text-soft); }
 
-.scan-placeholder-icon {
-  font-size: 24px;
-  color: #bdc3c7;
-}
-
-/* ========== SCAN INFO ========== */
-.scan-info {
-  flex: 1;
-  min-width: 0;
-}
+.scan-info { flex: 1; min-width: 0; }
 
 .scan-name {
   margin: 0 0 2px;
   font-size: 14px;
   font-weight: 700;
-  color: #2c3e50;
+  color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.scan-brand {
-  margin: 0 0 3px;
-  font-size: 12px;
-  color: #7f8c8d;
-}
+.scan-brand  { margin: 0 0 3px; font-size: 12px; color: var(--text-muted); }
+.scan-date   { margin: 0 0 6px; font-size: 11px; color: var(--text-soft); font-weight: 600; }
 
-.scan-date {
-  margin: 0 0 6px;
-  font-size: 11px;
-  color: #95a5a6;
-  font-weight: 600;
-}
-
-/* ========== NUTRIENTS PILLS ========== */
-.scan-nutrients {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
+.scan-nutrients { display: flex; flex-wrap: wrap; gap: 4px; }
 
 .nutrient-pill {
-  background: #f0f4f8;
-  color: #2c3e50;
+  background: var(--bg);
+  color: var(--text);
   font-size: 11px;
   font-weight: 700;
   padding: 3px 8px;
   border-radius: 20px;
 }
 
-/* ========== SCORE ========== */
 .scan-score {
   display: flex;
   flex-direction: column;
@@ -215,6 +168,4 @@
   font-size: 14px;
 }
 
-.score-emoji {
-  font-size: 14px;
-}
+.score-emoji { font-size: 14px; }

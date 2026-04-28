@@ -1,13 +1,66 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+/* ========== LIGHT MODE (défaut) ========== */
+:root {
+  --primary: #2ecc71;
+  --primary-dark: #27ae60;
+  --danger: #e74c3c;
+
+  --nutri-a: #2ecc71;
+  --nutri-b: #87d068;
+  --nutri-c: #f0c040;
+  --nutri-d: #e67e22;
+  --nutri-e: #e74c3c;
+
+  --bg: #f0f4f8;
+  --bg2: #e8f5ee;
+  --card: #ffffff;
+  --card2: #f8fafc;
+  --text: #2c3e50;
+  --text-muted: #7f8c8d;
+  --text-soft: #95a5a6;
+  --border: #f0f2f5;
+  --border2: #ececec;
+  --input-bg: #ffffff;
+  --shadow: rgba(0, 0, 0, 0.06);
+  --shadow-md: rgba(0, 0, 0, 0.1);
+
+  --navbar-bg: #ffffff;
+  --navbar-border: #f0f2f5;
+
+  --radius: 16px;
+  --font: 'Nunito', sans-serif;
+  --navbar-height: 70px;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* ========== DARK MODE ========== */
+[data-theme="dark"] {
+  --bg: #0f1923;
+  --bg2: #1a2535;
+  --card: #1e2d3d;
+  --card2: #243447;
+  --text: #e8f0fe;
+  --text-muted: #8899aa;
+  --text-soft: #6b7f93;
+  --border: #2a3f55;
+  --border2: #243447;
+  --input-bg: #1e2d3d;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --shadow-md: rgba(0, 0, 0, 0.4);
+
+  --navbar-bg: #1e2d3d;
+  --navbar-border: #2a3f55;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s ease, color 0.3s ease;
 }
