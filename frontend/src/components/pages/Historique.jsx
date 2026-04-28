@@ -1,6 +1,22 @@
 import React, { useState, useEffect } from "react";
+import { FaBoxOpen, FaTrash } from "react-icons/fa";
+import { useLang } from "../../translations/LanguageContext";
+import "./Historique.css";
 
-const Historique = () => {
+const SCORE_COLORS = {
+  a: "#1e8f4e", b: "#85bb2f", c: "#f9b233", d: "#ee8100", e: "#e63312",
+};
+
+const getScoreEmoji = (score) => {
+  const s = (score || "").toLowerCase();
+  if (s === "a" || s === "b") return "✅";
+  if (s === "c") return "⚠️";
+  if (s === "d" || s === "e") return "❌";
+  return "❓";
+};
+
+export default function Historique() {
+  const { t, lang } = useLang();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -11,89 +27,112 @@ const Historique = () => {
 
   const fetchHistory = async () => {
     try {
-      const res = await fetch('/api/scans/history', {
-        credentials: 'include'
-      });
+      const res = await fetch("/api/scans/history", { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         setHistory(data);
       } else {
-        setError("Erreur lors de la récupération de l'historique");
+        setError(t("historyError"));
       }
     } catch (err) {
       console.error("Erreur fetch historique:", err);
-      setError("Erreur serveur");
+      setError(t("serverError"));
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) return <div>Chargement...</div>;
-  if (error) return <div style={{ color: "red" }}>{error}</div>;
+  const formatDate = (dateStr) => {
+    return new Date(dateStr).toLocaleDateString(
+      lang === "ar" ? "ar-MA" : lang === "en" ? "en-GB" : "fr-FR",
+      { day: "numeric", month: "long", year: "numeric" }
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="historique-container">
+        <div className="historique-loading">
+          <div className="loading-spinner" />
+          <p>{t("loading")}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="historique-container">
+        <div className="historique-error">😕 {error}</div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Historique des scans</h1>
+    <div className="historique-container">
+      {/* HEADER */}
+      <div className="historique-header">
+        <h2>🕓 {t("historyTitle")}</h2>
+        <span className="historique-count">{history.length} {t("scans")}</span>
+      </div>
+
+      {/* EMPTY STATE */}
       {history.length === 0 ? (
-        <p>Aucun scan enregistré.</p>
+        <div className="historique-empty">
+          <FaBoxOpen className="empty-icon" />
+          <p>{t("historyEmpty")}</p>
+        </div>
       ) : (
-        <div>
+        <div className="historique-list">
           {history.map((scan, index) => (
-            <div key={index} style={{
-              border: "2px solid #ddd",
-              padding: "15px",
-              marginBottom: "15px",
-              borderRadius: "10px",
-              backgroundColor: "#f9f9f9"
-            }}>
-              <div style={{ display: "flex", alignItems: "center" }}>
-                {scan.image && (
-                  <img
-                    src={scan.image}
-                    alt={scan.productName}
-                    style={{
-                      width: "80px",
-                      height: "80px",
-                      objectFit: "cover",
-                      borderRadius: "8px",
-                      marginRight: "15px"
-                    }}
-                  />
+            <div key={index} className="scan-card">
+              {/* IMAGE */}
+              <div className="scan-image">
+                {scan.image ? (
+                  <img src={scan.image} alt={scan.productName} />
+                ) : (
+                  <FaBoxOpen className="scan-placeholder-icon" />
                 )}
-                <div>
-                  <h3 style={{ margin: "0 0 5px 0" }}>{scan.productName}</h3>
-                  <p style={{ margin: "0", color: "#666" }}>{scan.brand}</p>
-                  <p style={{ margin: "5px 0", fontSize: "14px", color: "#999" }}>
-                    Scanné le {new Date(scan.scannedAt).toLocaleDateString('fr-FR')}
-                  </p>
-                  {scan.nutriScore && (
-                    <span style={{
-                      display: "inline-block",
-                      padding: "4px 8px",
-                      backgroundColor: scan.nutriScore === "a" ? "#4CAF50" : scan.nutriScore === "b" ? "#8BC34A" : scan.nutriScore === "c" ? "#FFC107" : scan.nutriScore === "d" ? "#FF9800" : "#F44336",
-                      color: "white",
-                      borderRadius: "4px",
-                      fontWeight: "bold",
-                      textTransform: "uppercase",
-                      fontSize: "12px"
-                    }}>
-                      {scan.nutriScore}
-                    </span>
+              </div>
+
+              {/* INFO */}
+              <div className="scan-info">
+                <h4 className="scan-name">{scan.productName || t("unknownProduct")}</h4>
+                <p className="scan-brand">{scan.brand || "—"}</p>
+                <p className="scan-date">📅 {formatDate(scan.scannedAt)}</p>
+
+                {/* NUTRIENTS */}
+                <div className="scan-nutrients">
+                  {scan.calories != null && (
+                    <span className="nutrient-pill">🔥 {Math.round(scan.calories)} kcal</span>
+                  )}
+                  {scan.proteins != null && (
+                    <span className="nutrient-pill">💪 {Number(scan.proteins).toFixed(1)}g</span>
+                  )}
+                  {scan.carbs != null && (
+                    <span className="nutrient-pill">🌾 {Number(scan.carbs).toFixed(1)}g</span>
+                  )}
+                  {scan.fat != null && (
+                    <span className="nutrient-pill">🫒 {Number(scan.fat).toFixed(1)}g</span>
                   )}
                 </div>
               </div>
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))",
-                gap: "10px",
-                marginTop: "10px"
-              }}>
-                {scan.calories && <div>Calories: {scan.calories} kcal</div>}
-                {scan.proteins && <div>Protéines: {scan.proteins}g</div>}
-                {scan.carbs && <div>Glucides: {scan.carbs}g</div>}
-                {scan.fat && <div>Graisses: {scan.fat}g</div>}
-                {scan.sugar && <div>Sucres: {scan.sugar}g</div>}
-                {scan.salt && <div>Sel: {scan.salt}g</div>}
+
+              {/* SCORE */}
+              <div className="scan-score">
+                {scan.nutriScore ? (
+                  <>
+                    <div
+                      className="nutri-badge"
+                      style={{ background: SCORE_COLORS[scan.nutriScore.toLowerCase()] }}
+                    >
+                      {scan.nutriScore.toUpperCase()}
+                    </div>
+                    <span className="score-emoji">{getScoreEmoji(scan.nutriScore)}</span>
+                  </>
+                ) : (
+                  <span className="score-emoji">❓</span>
+                )}
               </div>
             </div>
           ))}
@@ -101,6 +140,4 @@ const Historique = () => {
       )}
     </div>
   );
-};
-
-export default Historique;
+}
