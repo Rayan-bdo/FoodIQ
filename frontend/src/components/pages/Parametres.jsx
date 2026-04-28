@@ -33,7 +33,6 @@ export default function Parametres() {
 
   const currentLang = LANGUAGES.find((l) => l.code === lang);
 
-  // 🔐 Récup user
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -52,13 +51,9 @@ export default function Parametres() {
     fetchUser();
   }, [navigate]);
 
-  // 🚪 Déconnexion
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
       setUser(null);
       navigate("/");
     } catch (err) {
@@ -68,7 +63,8 @@ export default function Parametres() {
 
   return (
     <div className="parametres-container">
-      {/* 🔝 HEADER */}
+
+      {/* HEADER */}
       <div className="parametres-header">
         <button className="back-btn" onClick={() => navigate(-1)}>
           <FaArrowLeft />
@@ -77,25 +73,25 @@ export default function Parametres() {
         <div style={{ width: 36 }} />
       </div>
 
-      {/* 👤 USER CARD */}
+      {/* USER CARD */}
       <div className="user-card">
         <div className="user-avatar">
           {user?.name ? user.name.charAt(0).toUpperCase() : "?"}
         </div>
         <div className="user-info">
-          <h3>{user?.name || "Utilisateur"}</h3>
+          <h3>{user?.name || t("unknownProduct")}</h3>
           <p>{user?.email || "—"}</p>
         </div>
       </div>
 
-      {/* 👤 COMPTE */}
+      {/* COMPTE */}
       <section className="settings-section">
-        <h4 className="settings-section-title">Compte</h4>
+        <h4 className="settings-section-title">{t("account")}</h4>
         <div className="settings-list">
           <button className="settings-item" onClick={() => navigate("/profil/edit")}>
             <div className="settings-item-left">
               <div className="settings-icon icon-blue"><FaUser /></div>
-              <span>Modifier le profil</span>
+              <span>{t("editProfile")}</span>
             </div>
             <FaChevronRight className="chevron" />
           </button>
@@ -103,21 +99,21 @@ export default function Parametres() {
           <button className="settings-item" onClick={() => navigate("/changer-mdp")}>
             <div className="settings-item-left">
               <div className="settings-icon icon-purple"><FaLock /></div>
-              <span>Changer le mot de passe</span>
+              <span>{t("changePassword")}</span>
             </div>
             <FaChevronRight className="chevron" />
           </button>
         </div>
       </section>
 
-      {/* ⚙️ PRÉFÉRENCES */}
+      {/* PRÉFÉRENCES */}
       <section className="settings-section">
-        <h4 className="settings-section-title">Préférences</h4>
+        <h4 className="settings-section-title">{t("preferences")}</h4>
         <div className="settings-list">
           <div className="settings-item">
             <div className="settings-item-left">
               <div className="settings-icon icon-orange"><FaBell /></div>
-              <span>Notifications</span>
+              <span>{t("notifications")}</span>
             </div>
             <label className="switch">
               <input type="checkbox" checked={notifications} onChange={() => setNotifications(!notifications)} />
@@ -128,7 +124,7 @@ export default function Parametres() {
           <div className="settings-item">
             <div className="settings-item-left">
               <div className="settings-icon icon-dark"><FaMoon /></div>
-              <span>Mode sombre</span>
+              <span>{t("darkMode")}</span>
             </div>
             <label className="switch">
               <input type="checkbox" checked={darkMode} onChange={() => setDarkMode(!darkMode)} />
@@ -136,7 +132,6 @@ export default function Parametres() {
             </label>
           </div>
 
-          {/* 🌍 LANGUE */}
           <button className="settings-item" onClick={() => setShowLangModal(true)}>
             <div className="settings-item-left">
               <div className="settings-icon icon-green"><FaLanguage /></div>
@@ -150,14 +145,14 @@ export default function Parametres() {
         </div>
       </section>
 
-      {/* 🛡️ CONFIDENTIALITÉ & AIDE */}
+      {/* CONFIDENTIALITÉ & AIDE */}
       <section className="settings-section">
-        <h4 className="settings-section-title">Confidentialité & Aide</h4>
+        <h4 className="settings-section-title">{t("privacyHelp")}</h4>
         <div className="settings-list">
           <button className="settings-item">
             <div className="settings-item-left">
               <div className="settings-icon icon-teal"><FaShieldAlt /></div>
-              <span>Politique de confidentialité</span>
+              <span>{t("privacyPolicy")}</span>
             </div>
             <FaChevronRight className="chevron" />
           </button>
@@ -165,7 +160,7 @@ export default function Parametres() {
           <button className="settings-item">
             <div className="settings-item-left">
               <div className="settings-icon icon-yellow"><FaQuestionCircle /></div>
-              <span>Aide & Support</span>
+              <span>{t("helpSupport")}</span>
             </div>
             <FaChevronRight className="chevron" />
           </button>
@@ -173,7 +168,7 @@ export default function Parametres() {
           <button className="settings-item">
             <div className="settings-item-left">
               <div className="settings-icon icon-gray"><FaInfoCircle /></div>
-              <span>À propos</span>
+              <span>{t("about")}</span>
             </div>
             <div className="settings-item-right">
               <span className="value">v1.0.0</span>
@@ -183,21 +178,21 @@ export default function Parametres() {
         </div>
       </section>
 
-      {/* 🚪 DÉCONNEXION */}
+      {/* ZONE SENSIBLE */}
       <section className="settings-section">
-        <h4 className="settings-section-title danger-title">Zone sensible</h4>
+        <h4 className="settings-section-title danger-title">{t("dangerZone")}</h4>
         <div className="settings-list">
           <button className="settings-item danger" onClick={() => setShowLogoutModal(true)}>
             <div className="settings-item-left">
               <div className="settings-icon icon-orange-red"><FaSignOutAlt /></div>
-              <span>Déconnexion</span>
+              <span>{t("logout")}</span>
             </div>
             <FaChevronRight className="chevron" />
           </button>
         </div>
       </section>
 
-      {/* 🌍 MODAL LANGUE */}
+      {/* MODAL LANGUE */}
       {showLangModal && (
         <div className="modal-overlay" onClick={() => setShowLangModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -210,10 +205,7 @@ export default function Parametres() {
                 <button
                   key={l.code}
                   className={`lang-option ${lang === l.code ? "active" : ""}`}
-                  onClick={() => {
-                    setLang(l.code);
-                    setShowLangModal(false);
-                  }}
+                  onClick={() => { setLang(l.code); setShowLangModal(false); }}
                 >
                   <span className="lang-flag">{l.flag}</span>
                   <span className="lang-label">{l.label}</span>
@@ -222,26 +214,27 @@ export default function Parametres() {
               ))}
             </div>
             <button className="btn-secondary" style={{ width: "100%", marginTop: 12 }} onClick={() => setShowLangModal(false)}>
-              Annuler
+              {t("cancel")}
             </button>
           </div>
         </div>
       )}
 
-      {/* 🚪 MODAL DÉCONNEXION */}
+      {/* MODAL DÉCONNEXION */}
       {showLogoutModal && (
         <div className="modal-overlay" onClick={() => setShowLogoutModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-icon orange"><FaSignOutAlt /></div>
-            <h3>Se déconnecter ?</h3>
-            <p>Tu devras te reconnecter pour accéder à ton compte.</p>
+            <h3>{t("logoutConfirmTitle")}</h3>
+            <p>{t("logoutConfirmMsg")}</p>
             <div className="modal-actions">
-              <button className="btn-secondary" onClick={() => setShowLogoutModal(false)}>Annuler</button>
-              <button className="btn-danger" onClick={handleLogout}>Déconnexion</button>
+              <button className="btn-secondary" onClick={() => setShowLogoutModal(false)}>{t("cancel")}</button>
+              <button className="btn-danger" onClick={handleLogout}>{t("logout")}</button>
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 }
