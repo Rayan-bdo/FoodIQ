@@ -1,12 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import {
-  FaArrowLeft,
-  FaUser,
-  FaEnvelope,
-  FaCamera,
-  FaCheck,
-} from "react-icons/fa";
+import { FaArrowLeft, FaUser, FaEnvelope, FaCheck } from "react-icons/fa";
 import { useLang } from "../../translations/LanguageContext";
 import "./ModifierProfil.css";
 
@@ -18,7 +12,7 @@ export default function ModifierProfil() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
-  const [form, setForm] = useState({ name: "", email: "", avatar: "" });
+  const [form, setForm] = useState({ name: "", email: "" });
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -26,7 +20,7 @@ export default function ModifierProfil() {
         const res = await fetch("/api/auth/profile", { method: "GET", credentials: "include" });
         if (!res.ok) throw new Error("Not authorized");
         const data = await res.json();
-        setForm({ name: data.name || "", email: data.email || "", avatar: data.avatar || "" });
+        setForm({ name: data.name || "", email: data.email || "" });
       } catch (err) {
         console.error(err);
         navigate("/");
@@ -63,7 +57,7 @@ export default function ModifierProfil() {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: form.name.trim(), email: form.email.trim(), avatar: form.avatar }),
+        body: JSON.stringify({ name: form.name.trim(), email: form.email.trim() }),
       });
 
       if (!res.ok) {
@@ -91,19 +85,11 @@ export default function ModifierProfil() {
         <div style={{ width: 36 }} />
       </div>
 
-      {/* AVATAR */}
+      {/* INITIALE */}
       <div className="avatar-section">
-        <div className="avatar-wrapper">
-          <div className="avatar-circle">
-            {form.avatar ? (
-              <img src={form.avatar} alt="avatar" />
-            ) : (
-              form.name.charAt(0).toUpperCase() || "?"
-            )}
-          </div>
-          <button className="avatar-edit-btn" type="button"><FaCamera /></button>
+        <div className="avatar-circle-static">
+          {form.name.charAt(0).toUpperCase() || "?"}
         </div>
-        <p className="avatar-hint">{t("avatarHint")}</p>
       </div>
 
       {/* FORM */}

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './components/navbar/navbar';
 import { LanguageProvider } from "./translations/LanguageContext";
+import PrivateRoute from './components/PrivateRoute';
 
 // PAGES
 import Scanner from './components/pages/Scanner';
@@ -12,24 +13,36 @@ import Recherche from './components/pages/Recherche';
 import Profil from './components/pages/Profil';
 import Login from './components/pages/Login';
 import Parametres from './components/pages/Parametres';
-
 import ModifierProfil from './components/pages/ModifierProfil';
 import ChangerMotDePasse from './components/pages/ChangerMotDePasse';
 
 // 🎬 Animations
 const pageVariants = {
   initial: { opacity: 0, x: 100 },
-  in: { opacity: 1, x: 0 },
-  out: { opacity: 0, x: -100 }
+  in:      { opacity: 1, x: 0 },
+  out:     { opacity: 0, x: -100 },
 };
 
 const pageTransition = {
   type: 'tween',
   ease: 'anticipate',
-  duration: 0.4
+  duration: 0.4,
 };
 
-// 🔁 Routes animées
+function Page({ children }) {
+  return (
+    <motion.div
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+      transition={pageTransition}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 function AnimatedRoutes() {
   const location = useLocation();
 
@@ -37,72 +50,45 @@ function AnimatedRoutes() {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
 
-        <Route path="/" element={
-          <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
-            <Login />
-          </motion.div>
-        } />
+        {/* Pages publiques */}
+        <Route path="/" element={<Page><Login /></Page>} />
+        <Route path="/scanner" element={<Page><Scanner /></Page>} />
+        <Route path="/historique" element={<Page><Historique /></Page>} />
+        <Route path="/ia" element={<Page><IA /></Page>} />
+        <Route path="/recherche" element={<Page><Recherche /></Page>} />
 
-        <Route path="/scanner" element={
-          <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
-            <Scanner />
-          </motion.div>
-        } />
-
-        <Route path="/historique" element={
-          <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
-            <Historique />
-          </motion.div>
-        } />
-
-        <Route path="/ia" element={
-          <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
-            <IA />
-          </motion.div>
-        } />
-
-        <Route path="/recherche" element={
-          <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
-            <Recherche />
-          </motion.div>
-        } />
-
+        {/* Pages protégées — PrivateRoute vérifie l'auth avant d'afficher quoi que ce soit */}
         <Route path="/profil" element={
-          <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
-            <Profil />
-          </motion.div>
+          <PrivateRoute>
+            <Page><Profil /></Page>
+          </PrivateRoute>
         } />
 
         <Route path="/parametres" element={
-          <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
-            <Parametres />
-          </motion.div>
+          <PrivateRoute>
+            <Page><Parametres /></Page>
+          </PrivateRoute>
         } />
 
         <Route path="/profil/edit" element={
-          <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
-            <ModifierProfil />
-          </motion.div>
+          <PrivateRoute>
+            <Page><ModifierProfil /></Page>
+          </PrivateRoute>
         } />
 
         <Route path="/changer-mdp" element={
-          <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
-            <ChangerMotDePasse />
-          </motion.div>
+          <PrivateRoute>
+            <Page><ChangerMotDePasse /></Page>
+          </PrivateRoute>
         } />
 
-        <Route path="*" element={
-          <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition}>
-            <Login />
-          </motion.div>
-        } />
+        <Route path="*" element={<Page><Login /></Page>} />
 
       </Routes>
     </AnimatePresence>
   );
 }
 
-// 🧠 App principale
 function App() {
   return (
     <LanguageProvider>

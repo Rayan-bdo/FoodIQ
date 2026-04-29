@@ -40,11 +40,7 @@ exports.login = async (req, res) => {
 
     return res.status(200).json({
       message: "Login successful",
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email
-      }
+      user: { id: user._id, name: user.name, email: user.email }
     });
 
   } catch (error) {
@@ -52,7 +48,6 @@ exports.login = async (req, res) => {
     return res.status(500).json({ error: "Server error" });
   }
 };
-
 
 // ====================== REGISTER ======================
 exports.register = async (req, res) => {
@@ -71,12 +66,7 @@ exports.register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = new User({
-      name,
-      email,
-      password: hashedPassword
-    });
-
+    const user = new User({ name, email, password: hashedPassword });
     await user.save();
 
     const token = jwt.sign(
@@ -94,10 +84,7 @@ exports.register = async (req, res) => {
 
     return res.status(201).json({
       message: "User created",
-      user: {
-        name: user.name,
-        email: user.email
-      }
+      user: { name: user.name, email: user.email }
     });
 
   } catch (error) {
@@ -105,7 +92,6 @@ exports.register = async (req, res) => {
     return res.status(500).json({ error: "Server error" });
   }
 };
-
 
 // ====================== LOGOUT ======================
 exports.logout = (req, res) => {
@@ -117,4 +103,79 @@ exports.logout = (req, res) => {
   });
 
   return res.json({ message: "Logged out successfully" });
+};
+
+// ====================== UPDATE PROFILE ======================
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, email, avatar } = req.body;
+    const userId = req.user._id;
+
+    if (!name || name.trim().length < 2) {
+      return res.status(400).json({ error: "Le nom doit contenir au moins 2 caractères" });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: "Email invalide" });
+    }
+
+    // Vérifie si l'email est déjà pris par un autre utilisateur
+    const existing = await User.findOne({ email, _id: { $ne: userId } });
+    if (existing) {
+      return res.status(400).json({ error: "Cet email est déjà utilisé" });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { name: name.trim(), email: email.trim(), ...(avatar && { avatar }) },
+      { new: true }
+    );
+
+    return res.json({
+      id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      avatar: updatedUser.avatar || null,
+    });
+
+  } catch (error) {
+    console.error("Update profile error:", error);
+    return res.status(500).json({ error: "Erreur serveur" });
+  }
+};
+
+// ====================== CHANGE PASSWORD ======================
+exports.changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const userId = req.user._id;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ error: "Champs manquants" });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: "Le mot de passe doit faire au moins 8 caractères" });
+    }
+
+    const user = await User.findById(userId);
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: "Ancien mot de passe incorrect" });
+    }
+
+    if (oldPassword === newPassword) {
+      return res.status(400).json({ error: "Le nouveau mot de passe doit être différent" });
+    }
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await User.findByIdAndUpdate(userId, { password: hashed });
+
+    return res.json({ message: "Mot de passe modifié avec succès" });
+
+  } catch (error) {
+    console.error("Change password error:", error);
+    return res.status(500).json({ error: "Erreur serveur" });
+  }
 };
