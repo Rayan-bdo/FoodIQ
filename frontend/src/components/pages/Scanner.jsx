@@ -2,15 +2,13 @@ import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { useNavigate } from "react-router-dom";
 import { useLang } from "../../translations/LanguageContext";
+import { calculateScore, getScoreColor, getScoreLabel } from "../../utils/scoreUtils";
 import "./Scanner.css";
 
 /* ---------- Helpers ---------- */
 const SCORE_COLORS = {
-  a: "var(--nutri-a)",
-  b: "var(--nutri-b)",
-  c: "var(--nutri-c)",
-  d: "var(--nutri-d)",
-  e: "var(--nutri-e)",
+  a: "var(--nutri-a)", b: "var(--nutri-b)", c: "var(--nutri-c)",
+  d: "var(--nutri-d)", e: "var(--nutri-e)",
 };
 
 function getNutrients(t) {
@@ -34,13 +32,45 @@ function formatValue(val, unit) {
   return val.toFixed(1);
 }
 
+/* ---------- Score Circle ---------- */
+function ScoreCircle({ score, lang }) {
+  const color = getScoreColor(score);
+  const label = getScoreLabel(score, lang);
+  const radius = 28;
+  const circumference = 2 * Math.PI * radius;
+  const progress = (score / 100) * circumference;
+
+  return (
+    <div className="score-circle-wrapper">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <circle cx="40" cy="40" r={radius} fill="none" stroke="var(--border)" strokeWidth="6" />
+        <circle
+          cx="40" cy="40" r={radius}
+          fill="none"
+          stroke={color}
+          strokeWidth="6"
+          strokeDasharray={`${progress} ${circumference}`}
+          strokeLinecap="round"
+          transform="rotate(-90 40 40)"
+          style={{ transition: "stroke-dasharray 0.8s ease" }}
+        />
+        <text x="40" y="44" textAnchor="middle" fontSize="16" fontWeight="800" fill={color}>
+          {score}
+        </text>
+      </svg>
+      <span className="score-circle-label" style={{ color }}>{label}</span>
+    </div>
+  );
+}
+
 /* ---------- Product ---------- */
 function ProductResult({ product }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const NUTRIENTS = getNutrients(t);
   const nutrients = NUTRIENTS.filter((n) => product[n.key] != null);
   const ns = product.nutriScore?.toLowerCase();
   const scoreLabels = t("nutriScoreLabels");
+  const score = calculateScore(product);
 
   return (
     <div style={{ marginTop: 24 }}>
@@ -49,18 +79,18 @@ function ProductResult({ product }) {
           {product.image && (
             <img src={product.image} alt="" className="product-image" />
           )}
-          <div>
+          <div style={{ flex: 1 }}>
             <h2>{product.name}</h2>
             <p className="brand">{product.brand}</p>
             {ns && (
               <div className="nutri-score">
                 <div className={`badge ${ns}`}>{ns.toUpperCase()}</div>
-                <span style={{ color: SCORE_COLORS[ns] }}>
-                  {scoreLabels[ns]}
-                </span>
+                <span style={{ color: SCORE_COLORS[ns] }}>{scoreLabels[ns]}</span>
               </div>
             )}
           </div>
+          {/* SCORE YUKA */}
+          <ScoreCircle score={score} lang={lang} />
         </div>
       </div>
 
@@ -98,23 +128,17 @@ export default function Scanner() {
 
   const scannerRef = useRef(null);
 
-  /* ---------- SAFE STOP ---------- */
   const safeStop = useCallback(async () => {
     try {
-      if (scannerRef.current) {
-        await scannerRef.current.stop().catch(() => {});
-      }
+      if (scannerRef.current) await scannerRef.current.stop().catch(() => {});
     } catch (e) {}
     scannerRef.current = null;
     setIsScanning(false);
     setTorchOn(false);
   }, []);
 
-  useEffect(() => {
-    return () => safeStop();
-  }, [safeStop]);
+  useEffect(() => { return () => safeStop(); }, [safeStop]);
 
-  /* ---------- FETCH PRODUCT ---------- */
   const handleScan = async (code) => {
     setIsLoading(true);
     setProduct(null);
@@ -123,12 +147,9 @@ export default function Scanner() {
 
     try {
       const res = await fetch(`/api/product/${code}?lang=${lang}`, {
-        method: "GET",
-        credentials: "include",
+        method: "GET", credentials: "include",
       });
-
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.message || "Introuvable");
 
       setBarcode(code);
@@ -140,20 +161,11 @@ export default function Scanner() {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          barcode: code,
-          productName: data.name,
-          brand: data.brand,
-          image: data.image,
-          nutriScore: data.nutriScore,
-          calories: data.calories,
-          proteins: data.proteins,
-          carbs: data.carbs,
-          fat: data.fat,
-          saturatedFat: data.saturatedFat,
-          sugar: data.sugar,
-          salt: data.salt,
-          sodium: data.sodium,
-          fiber: data.fiber,
+          barcode: code, productName: data.name, brand: data.brand,
+          image: data.image, nutriScore: data.nutriScore,
+          calories: data.calories, proteins: data.proteins, carbs: data.carbs,
+          fat: data.fat, saturatedFat: data.saturatedFat, sugar: data.sugar,
+          salt: data.salt, sodium: data.sodium, fiber: data.fiber,
         }),
       }).catch(() => {});
     } catch {
@@ -165,10 +177,8 @@ export default function Scanner() {
     }
   };
 
-  /* ---------- START SCANNER ---------- */
   const startScanner = useCallback(() => {
     if (isScanning) return;
-
     setIsScanning(true);
     setProduct(null);
     setError("");
@@ -186,16 +196,10 @@ export default function Scanner() {
       async (text) => {
         if (lock) return;
         setLock(true);
-
         setScanSuccess(true);
         navigator.vibrate?.(200);
-
-        try {
-          new Audio("/beep.mp3").play();
-        } catch {}
-
+        try { new Audio("/beep.mp3").play(); } catch {}
         await safeStop();
-
         setTimeout(() => {
           setScanSuccess(false);
           handleScan(text);
@@ -205,47 +209,27 @@ export default function Scanner() {
     );
   }, [cameraMode, isScanning, lock, safeStop]);
 
-  /* ---------- STOP ---------- */
-  const stopScanner = useCallback(() => {
-    safeStop();
-  }, [safeStop]);
+  const stopScanner = useCallback(() => safeStop(), [safeStop]);
 
-  /* ---------- SWITCH CAMERA ---------- */
   const switchCamera = useCallback(() => {
-    setCameraMode((prev) =>
-      prev === "environment" ? "user" : "environment"
-    );
-    if (isScanning) {
-      safeStop();
-      setTimeout(() => startScanner(), 300);
-    }
+    setCameraMode((prev) => prev === "environment" ? "user" : "environment");
+    if (isScanning) { safeStop(); setTimeout(() => startScanner(), 300); }
   }, [isScanning, safeStop, startScanner]);
 
-  /* ---------- TOGGLE TORCH ---------- */
   const toggleTorch = useCallback(async () => {
     try {
       if (!scannerRef.current) return;
       const newState = !torchOn;
-      await scannerRef.current.applyVideoConstraints({
-        advanced: [{ torch: newState }],
-      });
+      await scannerRef.current.applyVideoConstraints({ advanced: [{ torch: newState }] });
       setTorchOn(newState);
-    } catch (e) {
-      console.warn("Torche non supportée sur cet appareil", e);
-    }
+    } catch (e) { console.warn("Torche non supportée", e); }
   }, [torchOn]);
 
-  /* ---------- RESET ---------- */
   const resetScan = useCallback(() => {
     safeStop();
-    setBarcode("");
-    setProduct(null);
-    setError("");
-    setManualBarcode("");
-    setShowManual(false);
-    setLock(false);
-    setScanSuccess(false);
-
+    setBarcode(""); setProduct(null); setError("");
+    setManualBarcode(""); setShowManual(false);
+    setLock(false); setScanSuccess(false);
     const reader = document.getElementById("reader");
     if (reader) reader.innerHTML = "";
   }, [safeStop]);
@@ -254,9 +238,7 @@ export default function Scanner() {
     <div className="scanner-app">
       {product && (
         <header className="scanner-header">
-          <button className="btn-reset-header" onClick={resetScan}>
-            {t("newScan")}
-          </button>
+          <button className="btn-reset-header" onClick={resetScan}>{t("newScan")}</button>
         </header>
       )}
 
@@ -265,29 +247,14 @@ export default function Scanner() {
           <>
             <div className="scanner-viewfinder fullscreen">
               <div id="reader" />
-
               <div className="scan-frame">
-                <div className="corner tl" />
-                <div className="corner tr" />
-                <div className="corner bl" />
-                <div className="corner br" />
+                <div className="corner tl" /><div className="corner tr" />
+                <div className="corner bl" /><div className="corner br" />
                 <div className="scan-line" />
               </div>
 
-              <button
-                className={`btn-torch ${torchOn ? "active" : ""}`}
-                onClick={toggleTorch}
-                disabled={!isScanning}
-                aria-label="Lampe torche"
-              >
-                🔦
-              </button>
-
-              <button
-                className="btn-switch-top"
-                onClick={switchCamera}
-                aria-label="Changer de caméra"
-              >
+              <button className={`btn-torch ${torchOn ? "active" : ""}`} onClick={toggleTorch} disabled={!isScanning} aria-label="Lampe torche">🔦</button>
+              <button className="btn-switch-top" onClick={switchCamera} aria-label="Changer de caméra">
                 {cameraMode === "environment" ? "🤳" : "📷"}
               </button>
 
@@ -300,81 +267,34 @@ export default function Scanner() {
 
               <div className="scanner-actions-overlay">
                 {!isScanning ? (
-                  <button className="btn-scan" onClick={startScanner}>
-                    📷 {t("scanner")}
-                  </button>
+                  <button className="btn-scan" onClick={startScanner}>📷 {t("scanner")}</button>
                 ) : (
-                  <button className="btn-stop" onClick={stopScanner}>
-                    ⏹️ {t("stop")}
-                  </button>
+                  <button className="btn-stop" onClick={stopScanner}>⏹️ {t("stop")}</button>
                 )}
-
-                <button
-                  className="btn-manual"
-                  onClick={() => setShowManual(!showManual)}
-                  aria-label="Saisie manuelle"
-                >
-                  ⌨️
-                </button>
+                <button className="btn-manual" onClick={() => setShowManual(!showManual)} aria-label="Saisie manuelle">⌨️</button>
               </div>
             </div>
 
             {showManual && (
-              <form
-                className="manual-form"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (manualBarcode.trim()) {
-                    handleScan(manualBarcode);
-                    setManualBarcode("");
-                    setShowManual(false);
-                  }
-                }}
-              >
-                <input
-                  value={manualBarcode}
-                  onChange={(e) => setManualBarcode(e.target.value)}
-                  placeholder={t("barcodePlaceholder")}
-                />
+              <form className="manual-form" onSubmit={(e) => {
+                e.preventDefault();
+                if (manualBarcode.trim()) { handleScan(manualBarcode); setManualBarcode(""); setShowManual(false); }
+              }}>
+                <input value={manualBarcode} onChange={(e) => setManualBarcode(e.target.value)} placeholder={t("barcodePlaceholder")} />
                 <button type="submit">🔍</button>
               </form>
             )}
 
-            {barcode && (
-              <p className="barcode-display">
-                Code : <span>{barcode}</span>
-              </p>
-            )}
+            {barcode && <p className="barcode-display">Code : <span>{barcode}</span></p>}
 
             {isLoading && (
-              <p
-                style={{
-                  position: "fixed",
-                  bottom: "calc(var(--navbar-height) + 160px)",
-                  left: 0,
-                  right: 0,
-                  textAlign: "center",
-                  color: "#fff",
-                  fontWeight: 700,
-                  zIndex: 20,
-                  textShadow: "0 1px 4px rgba(0,0,0,0.6)",
-                }}
-              >
+              <p style={{ position: "fixed", bottom: "calc(var(--navbar-height) + 160px)", left: 0, right: 0, textAlign: "center", color: "#fff", fontWeight: 700, zIndex: 20, textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}>
                 {t("analyzing")}
               </p>
             )}
 
             {error && (
-              <div
-                className="error-banner"
-                style={{
-                  position: "fixed",
-                  bottom: "calc(var(--navbar-height) + 160px)",
-                  left: 16,
-                  right: 16,
-                  zIndex: 20,
-                }}
-              >
+              <div className="error-banner" style={{ position: "fixed", bottom: "calc(var(--navbar-height) + 160px)", left: 16, right: 16, zIndex: 20 }}>
                 😕 {error}
               </div>
             )}
