@@ -268,43 +268,28 @@
   background: var(--card);
   padding: 18px;
   border-radius: 20px;
-  margin-top: 20px;
   box-shadow: 0 4px 20px var(--shadow);
 }
 
-.product-header { display: flex; gap: 12px; }
-
-.product-image { width: 90px; height: 90px; object-fit: cover; border-radius: 14px; }
-
-.brand { color: var(--text-muted); font-size: 0.85rem; }
-
-.nutri-score { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
-
-.badge {
-  width: 45px; height: 45px;
-  border-radius: 50%;
+.product-header {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: 800;
-  color: white;
+  gap: 12px;
+  align-items: center; /* ← centré verticalement */
 }
 
-.badge.a { background: var(--nutri-a); }
-.badge.b { background: var(--nutri-b); }
-.badge.c { background: var(--nutri-c); }
-.badge.d { background: var(--nutri-d); }
-.badge.e { background: var(--nutri-e); }
+.product-image { width: 80px; height: 80px; object-fit: cover; border-radius: 14px; flex-shrink: 0; }
+
+.brand { color: var(--text-muted); font-size: 0.85rem; }
 
 .nutrients-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  margin-top: 16px;
+  margin-top: 4px;
 }
 
 .nutrient-card {
-  background: var(--card);
+  background: var(--card2);
   border: 1px solid var(--border2);
   border-radius: 14px;
   padding: 10px;
@@ -315,6 +300,29 @@
 .label { font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; }
 .value { font-weight: 800; margin-top: 4px; color: var(--text); }
 
+/* ===== SCORE GROUP (badge lettre + cercle) ===== */
+.score-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Badge lettre Nutri-Score seul */
+.nutri-letter-only {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 800;
+  color: white;
+  flex-shrink: 0;
+}
+
+/* ===== SCORE CIRCLE ===== */
 .score-circle-wrapper {
   display: flex;
   flex-direction: column;
@@ -322,10 +330,106 @@
   gap: 4px;
   flex-shrink: 0;
 }
- 
+
 .score-circle-label {
   font-size: 11px;
   font-weight: 800;
   text-align: center;
 }
- 
+
+/* ===== PRODUCT RESULT ===== */
+.product-result {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 20px;
+}
+
+/* ===== SECTIONS ANALYSE ===== */
+.analysis-section {
+  background: var(--card);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.analysis-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.defaut-title { color: #e63312; }
+.qualite-title { color: #1e8f4e; }
+
+.per100 {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-soft);
+  margin-left: 4px;
+}
+
+/* ===== ITEMS ===== */
+.analysis-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.analysis-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.analysis-item:last-child { border-bottom: none; padding-bottom: 0; }
+.analysis-item:first-child { padding-top: 0; }
+
+.analysis-icon {
+  font-size: 20px;
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.analysis-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.analysis-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.analysis-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.analysis-value {
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.defaut-value { color: #e63312; }
+.qualite-value { color: #1e8f4e; }
+
+.analysis-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.defaut-dot { background: #e63312; }
+.qualite-dot { background: #1e8f4e; }

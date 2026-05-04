@@ -68,6 +68,18 @@ const translations = {
     errorPwdMin: "Le nouveau mot de passe doit faire au moins 8 caractères",
     errorPwdSame: "Le nouveau mot de passe doit être différent de l'ancien",
     errorPwdMatch: "Les mots de passe ne correspondent pas",
+    // Analyse produit
+    defauts: "Défauts", qualites: "Qualités", nutritionValues: "Valeurs nutritionnelles",
+    qualSugarLow: "Très peu de sucre", qualSugarOk: "Peu de sucre",
+    defSugarMed: "Modérément sucré", defSugarHigh: "Trop sucré",
+    qualSatFatLow: "Pas de graisses saturées", qualSatFatOk: "Peu de graisses saturées",
+    defSatFatMed: "Assez gras", defSatFatHigh: "Trop de graisses saturées",
+    qualSaltLow: "Pas de sel", qualSaltOk: "Peu salé",
+    defSaltMed: "Un peu trop salé", defSaltHigh: "Trop salé",
+    qualCalLow: "Très peu calorique", qualCalOk: "Peu calorique",
+    defCalMed: "Assez calorique", defCalHigh: "Très calorique",
+    qualFiberHigh: "Riche en fibres", qualFiberOk: "Quelques fibres", defFiberLow: "Peu de fibres",
+    qualProtHigh: "Riche en protéines", qualProtOk: "Bonne source de protéines",
   },
 
   en: {
@@ -139,6 +151,18 @@ const translations = {
     errorPwdMin: "New password must be at least 8 characters",
     errorPwdSame: "New password must be different from the current one",
     errorPwdMatch: "Passwords don't match",
+    // Product analysis
+    defauts: "Drawbacks", qualites: "Qualities", nutritionValues: "Nutritional values",
+    qualSugarLow: "Very low sugar", qualSugarOk: "Low sugar",
+    defSugarMed: "Moderately sweet", defSugarHigh: "Too much sugar",
+    qualSatFatLow: "No saturated fat", qualSatFatOk: "Low saturated fat",
+    defSatFatMed: "Quite fatty", defSatFatHigh: "Too much saturated fat",
+    qualSaltLow: "No salt", qualSaltOk: "Low salt",
+    defSaltMed: "Slightly salty", defSaltHigh: "Too much salt",
+    qualCalLow: "Very low calorie", qualCalOk: "Low calorie",
+    defCalMed: "Moderately caloric", defCalHigh: "High calorie",
+    qualFiberHigh: "High in fiber", qualFiberOk: "Some fiber", defFiberLow: "Low in fiber",
+    qualProtHigh: "High in protein", qualProtOk: "Good source of protein",
   },
 
   ar: {
@@ -210,6 +234,18 @@ const translations = {
     errorPwdMin: "يجب أن تكون كلمة المرور الجديدة 8 أحرف على الأقل",
     errorPwdSame: "يجب أن تختلف كلمة المرور الجديدة عن الحالية",
     errorPwdMatch: "كلمتا المرور غير متطابقتين",
+    // تحليل المنتج
+    defauts: "العيوب", qualites: "المزايا", nutritionValues: "القيم الغذائية",
+    qualSugarLow: "سكر منخفض جداً", qualSugarOk: "قليل السكر",
+    defSugarMed: "محتوى سكر متوسط", defSugarHigh: "سكر مرتفع جداً",
+    qualSatFatLow: "بدون دهون مشبعة", qualSatFatOk: "دهون مشبعة منخفضة",
+    defSatFatMed: "دهون مشبعة متوسطة", defSatFatHigh: "دهون مشبعة مرتفعة",
+    qualSaltLow: "بدون ملح", qualSaltOk: "قليل الملح",
+    defSaltMed: "مالح قليلاً", defSaltHigh: "مالح جداً",
+    qualCalLow: "منخفض السعرات جداً", qualCalOk: "منخفض السعرات",
+    defCalMed: "سعرات متوسطة", defCalHigh: "عالي السعرات",
+    qualFiberHigh: "غني بالألياف", qualFiberOk: "بعض الألياف", defFiberLow: "قليل الألياف",
+    qualProtHigh: "غني بالبروتين", qualProtOk: "مصدر جيد للبروتين",
   },
 };
 

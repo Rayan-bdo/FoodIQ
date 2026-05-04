@@ -6,24 +6,9 @@ import { calculateScore, getScoreColor, getScoreLabel } from "../../utils/scoreU
 import "./Scanner.css";
 
 /* ---------- Helpers ---------- */
-const SCORE_COLORS = {
-  a: "var(--nutri-a)", b: "var(--nutri-b)", c: "var(--nutri-c)",
-  d: "var(--nutri-d)", e: "var(--nutri-e)",
+const NUTRI_BG = {
+  a: "#1e8f4e", b: "#85bb2f", c: "#f9b233", d: "#ee8100", e: "#e63312",
 };
-
-function getNutrients(t) {
-  return [
-    { key: "calories", label: t("calories"), unit: "kcal", icon: "🔥" },
-    { key: "proteins", label: t("proteins"), unit: "g", icon: "💪" },
-    { key: "carbs", label: t("carbs"), unit: "g", icon: "🌾" },
-    { key: "fat", label: t("fat"), unit: "g", icon: "🫒" },
-    { key: "saturatedFat", label: t("saturatedFat"), unit: "g", icon: "🧈" },
-    { key: "sugar", label: t("sugar"), unit: "g", icon: "🍬" },
-    { key: "salt", label: t("salt"), unit: "g", icon: "🧂" },
-    { key: "sodium", label: t("sodium"), unit: "mg", icon: "⚗️" },
-    { key: "fiber", label: t("fiber"), unit: "g", icon: "🥦" },
-  ];
-}
 
 function formatValue(val, unit) {
   if (val == null) return "N/A";
@@ -32,8 +17,76 @@ function formatValue(val, unit) {
   return val.toFixed(1);
 }
 
+/* ---------- Analyse qualités/défauts ---------- */
+function analyzeProduct(product, t) {
+  const qualities = [];
+  const defauts = [];
+
+  if (product.sugar != null) {
+    if (product.sugar <= 1)
+      qualities.push({ icon: "🍬", label: t("sugar"), desc: t("qualSugarLow"), value: `${product.sugar.toFixed(1)}g` });
+    else if (product.sugar <= 5)
+      qualities.push({ icon: "🍬", label: t("sugar"), desc: t("qualSugarOk"), value: `${product.sugar.toFixed(1)}g` });
+    else if (product.sugar <= 10)
+      defauts.push({ icon: "🍬", label: t("sugar"), desc: t("defSugarMed"), value: `${product.sugar.toFixed(1)}g` });
+    else
+      defauts.push({ icon: "🍬", label: t("sugar"), desc: t("defSugarHigh"), value: `${product.sugar.toFixed(1)}g` });
+  }
+
+  if (product.saturatedFat != null) {
+    if (product.saturatedFat <= 0.5)
+      qualities.push({ icon: "🧈", label: t("saturatedFat"), desc: t("qualSatFatLow"), value: `${product.saturatedFat.toFixed(1)}g` });
+    else if (product.saturatedFat <= 2)
+      qualities.push({ icon: "🧈", label: t("saturatedFat"), desc: t("qualSatFatOk"), value: `${product.saturatedFat.toFixed(1)}g` });
+    else if (product.saturatedFat <= 5)
+      defauts.push({ icon: "🧈", label: t("saturatedFat"), desc: t("defSatFatMed"), value: `${product.saturatedFat.toFixed(1)}g` });
+    else
+      defauts.push({ icon: "🧈", label: t("saturatedFat"), desc: t("defSatFatHigh"), value: `${product.saturatedFat.toFixed(1)}g` });
+  }
+
+  if (product.salt != null) {
+    if (product.salt <= 0.1)
+      qualities.push({ icon: "🧂", label: t("salt"), desc: t("qualSaltLow"), value: `${product.salt.toFixed(1)}g` });
+    else if (product.salt <= 0.6)
+      qualities.push({ icon: "🧂", label: t("salt"), desc: t("qualSaltOk"), value: `${product.salt.toFixed(1)}g` });
+    else if (product.salt <= 1.5)
+      defauts.push({ icon: "🧂", label: t("salt"), desc: t("defSaltMed"), value: `${product.salt.toFixed(1)}g` });
+    else
+      defauts.push({ icon: "🧂", label: t("salt"), desc: t("defSaltHigh"), value: `${product.salt.toFixed(1)}g` });
+  }
+
+  if (product.calories != null) {
+    if (product.calories <= 50)
+      qualities.push({ icon: "🔥", label: t("calories"), desc: t("qualCalLow"), value: `${Math.round(product.calories)} kcal` });
+    else if (product.calories <= 150)
+      qualities.push({ icon: "🔥", label: t("calories"), desc: t("qualCalOk"), value: `${Math.round(product.calories)} kcal` });
+    else if (product.calories <= 350)
+      defauts.push({ icon: "🔥", label: t("calories"), desc: t("defCalMed"), value: `${Math.round(product.calories)} kcal` });
+    else
+      defauts.push({ icon: "🔥", label: t("calories"), desc: t("defCalHigh"), value: `${Math.round(product.calories)} kcal` });
+  }
+
+  if (product.fiber != null) {
+    if (product.fiber >= 6)
+      qualities.push({ icon: "🥦", label: t("fiber"), desc: t("qualFiberHigh"), value: `${product.fiber.toFixed(1)}g` });
+    else if (product.fiber >= 3)
+      qualities.push({ icon: "🥦", label: t("fiber"), desc: t("qualFiberOk"), value: `${product.fiber.toFixed(1)}g` });
+    else if (product.fiber > 0)
+      defauts.push({ icon: "🥦", label: t("fiber"), desc: t("defFiberLow"), value: `${product.fiber.toFixed(1)}g` });
+  }
+
+  if (product.proteins != null) {
+    if (product.proteins >= 15)
+      qualities.push({ icon: "💪", label: t("proteins"), desc: t("qualProtHigh"), value: `${product.proteins.toFixed(1)}g` });
+    else if (product.proteins >= 5)
+      qualities.push({ icon: "💪", label: t("proteins"), desc: t("qualProtOk"), value: `${product.proteins.toFixed(1)}g` });
+  }
+
+  return { qualities, defauts };
+}
+
 /* ---------- Score Circle ---------- */
-function ScoreCircle({ score, lang }) {
+function ScoreCircle({ score, lang, ns }) {
   const color = getScoreColor(score);
   const label = getScoreLabel(score, lang);
   const radius = 28;
@@ -41,24 +94,27 @@ function ScoreCircle({ score, lang }) {
   const progress = (score / 100) * circumference;
 
   return (
-    <div className="score-circle-wrapper">
-      <svg width="80" height="80" viewBox="0 0 80 80">
-        <circle cx="40" cy="40" r={radius} fill="none" stroke="var(--border)" strokeWidth="6" />
-        <circle
-          cx="40" cy="40" r={radius}
-          fill="none"
-          stroke={color}
-          strokeWidth="6"
-          strokeDasharray={`${progress} ${circumference}`}
-          strokeLinecap="round"
-          transform="rotate(-90 40 40)"
-          style={{ transition: "stroke-dasharray 0.8s ease" }}
-        />
-        <text x="40" y="44" textAnchor="middle" fontSize="16" fontWeight="800" fill={color}>
-          {score}
-        </text>
-      </svg>
-      <span className="score-circle-label" style={{ color }}>{label}</span>
+    <div className="score-group">
+      {/* Badge lettre Nutri-Score */}
+      {ns && (
+        <div
+          className="nutri-letter-only"
+          style={{ background: NUTRI_BG[ns] }}
+        >
+          {ns.toUpperCase()}
+        </div>
+      )}
+      {/* Cercle score */}
+      <div className="score-circle-wrapper">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r={radius} fill="none" stroke="var(--border)" strokeWidth="6" />
+          <circle cx="40" cy="40" r={radius} fill="none" stroke={color} strokeWidth="6"
+            strokeDasharray={`${progress} ${circumference}`} strokeLinecap="round"
+            transform="rotate(-90 40 40)" style={{ transition: "stroke-dasharray 0.8s ease" }} />
+          <text x="40" y="44" textAnchor="middle" fontSize="16" fontWeight="800" fill={color}>{score}</text>
+        </svg>
+        <span className="score-circle-label" style={{ color }}>{label}</span>
+      </div>
     </div>
   );
 }
@@ -66,45 +122,92 @@ function ScoreCircle({ score, lang }) {
 /* ---------- Product ---------- */
 function ProductResult({ product }) {
   const { t, lang } = useLang();
-  const NUTRIENTS = getNutrients(t);
-  const nutrients = NUTRIENTS.filter((n) => product[n.key] != null);
   const ns = product.nutriScore?.toLowerCase();
-  const scoreLabels = t("nutriScoreLabels");
   const score = calculateScore(product);
+  const { qualities, defauts } = analyzeProduct(product, t);
+
+  const allNutrients = [
+    { key: "calories",     label: t("calories"),     unit: "kcal", icon: "🔥" },
+    { key: "proteins",     label: t("proteins"),     unit: "g",    icon: "💪" },
+    { key: "carbs",        label: t("carbs"),        unit: "g",    icon: "🌾" },
+    { key: "fat",          label: t("fat"),          unit: "g",    icon: "🫒" },
+    { key: "saturatedFat", label: t("saturatedFat"), unit: "g",    icon: "🧈" },
+    { key: "sugar",        label: t("sugar"),        unit: "g",    icon: "🍬" },
+    { key: "salt",         label: t("salt"),         unit: "g",    icon: "🧂" },
+    { key: "sodium",       label: t("sodium"),       unit: "mg",   icon: "⚗️" },
+    { key: "fiber",        label: t("fiber"),        unit: "g",    icon: "🥦" },
+  ].filter((n) => product[n.key] != null);
 
   return (
-    <div style={{ marginTop: 24 }}>
+    <div className="product-result">
+
+      {/* HEADER PRODUIT */}
       <div className="product-card">
         <div className="product-header">
-          {product.image && (
-            <img src={product.image} alt="" className="product-image" />
-          )}
+          {product.image && <img src={product.image} alt="" className="product-image" />}
           <div style={{ flex: 1 }}>
             <h2>{product.name}</h2>
             <p className="brand">{product.brand}</p>
-            {ns && (
-              <div className="nutri-score">
-                <div className={`badge ${ns}`}>{ns.toUpperCase()}</div>
-                <span style={{ color: SCORE_COLORS[ns] }}>{scoreLabels[ns]}</span>
-              </div>
-            )}
           </div>
-          {/* SCORE YUKA */}
-          <ScoreCircle score={score} lang={lang} />
+          {/* Badge lettre + cercle score côte à côte */}
+          <ScoreCircle score={score} lang={lang} ns={ns} />
         </div>
       </div>
 
-      <div className="nutrients-grid">
-        {nutrients.map((n) => (
-          <div key={n.key} className="nutrient-card">
-            <div className="icon">{n.icon}</div>
-            <div className="label">{n.label}</div>
-            <div className="value">
-              {formatValue(product[n.key], n.unit)} {n.unit}
-            </div>
+      {/* DÉFAUTS */}
+      {defauts.length > 0 && (
+        <div className="analysis-section">
+          <h3 className="analysis-title defaut-title">⚠️ {t("defauts")}</h3>
+          <div className="analysis-list">
+            {defauts.map((d, i) => (
+              <div key={i} className="analysis-item">
+                <span className="analysis-icon">{d.icon}</span>
+                <div className="analysis-info">
+                  <span className="analysis-label">{d.label}</span>
+                  <span className="analysis-desc">{d.desc}</span>
+                </div>
+                <span className="analysis-value defaut-value">{d.value}</span>
+                <span className="analysis-dot defaut-dot" />
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
+      )}
+
+      {/* QUALITÉS */}
+      {qualities.length > 0 && (
+        <div className="analysis-section">
+          <h3 className="analysis-title qualite-title">✅ {t("qualites")}</h3>
+          <div className="analysis-list">
+            {qualities.map((q, i) => (
+              <div key={i} className="analysis-item">
+                <span className="analysis-icon">{q.icon}</span>
+                <div className="analysis-info">
+                  <span className="analysis-label">{q.label}</span>
+                  <span className="analysis-desc">{q.desc}</span>
+                </div>
+                <span className="analysis-value qualite-value">{q.value}</span>
+                <span className="analysis-dot qualite-dot" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* VALEURS NUTRITIONNELLES */}
+      <div className="analysis-section">
+        <h3 className="analysis-title">{t("nutritionValues")} <span className="per100">pour 100g</span></h3>
+        <div className="nutrients-grid">
+          {allNutrients.map((n) => (
+            <div key={n.key} className="nutrient-card">
+              <div className="icon">{n.icon}</div>
+              <div className="label">{n.label}</div>
+              <div className="value">{formatValue(product[n.key], n.unit)} {n.unit}</div>
+            </div>
+          ))}
+        </div>
       </div>
+
     </div>
   );
 }
@@ -129,9 +232,7 @@ export default function Scanner() {
   const scannerRef = useRef(null);
 
   const safeStop = useCallback(async () => {
-    try {
-      if (scannerRef.current) await scannerRef.current.stop().catch(() => {});
-    } catch (e) {}
+    try { if (scannerRef.current) await scannerRef.current.stop().catch(() => {}); } catch (e) {}
     scannerRef.current = null;
     setIsScanning(false);
     setTorchOn(false);
@@ -146,9 +247,7 @@ export default function Scanner() {
     setBarcode("");
 
     try {
-      const res = await fetch(`/api/product/${code}?lang=${lang}`, {
-        method: "GET", credentials: "include",
-      });
+      const res = await fetch(`/api/product/${code}?lang=${lang}`, { method: "GET", credentials: "include" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Introuvable");
 
