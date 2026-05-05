@@ -1,121 +1,123 @@
 /**
- * Score nutritionnel 0-100 par nutriment pondéré
- * Chaque nutriment a son propre score 0-100, puis on fait une moyenne pondérée
- * Un seul nutriment mauvais peut tirer le score vers le bas
+ * Score nutritionnel 0-100
+ * Base : Nutri-Score officiel Open Food Facts
+ * Affinage : ±10 pts selon les nutriments
+ * Plafond : cohérence avec le Nutri-Score
  */
 
-// Score d'un nutriment négatif : 100 = parfait, 0 = très mauvais
-function scoreSugar(g) {
-  if (g == null) return null;
-  if (g <= 1)   return 100;
-  if (g <= 3)   return 80;
-  if (g <= 5)   return 60;
-  if (g <= 8)   return 40;
-  if (g <= 12)  return 20;
-  return 0; // > 12g → mauvais
+const NUTRI_SCORE_BASE = {
+  a: 87, b: 67, c: 47, d: 27, e: 10,
+};
+
+// Plafond max par Nutri-Score — un E ne peut jamais dépasser 20
+const NUTRI_SCORE_CAPS = {
+  a: 100, b: 82, c: 62, d: 37, e: 20,
+};
+
+// Plancher min par Nutri-Score — un A ne peut jamais être en dessous de 70
+const NUTRI_SCORE_FLOORS = {
+  a: 70, b: 50, c: 30, d: 15, e: 0,
+};
+
+function getNutrientAdjustment(product) {
+  let adjust = 0;
+
+  if (product.sugar != null) {
+    if (product.sugar > 20)      adjust -= 5;
+    else if (product.sugar > 12) adjust -= 3;
+    else if (product.sugar < 1)  adjust += 3;
+  }
+
+  if (product.saturatedFat != null) {
+    if (product.saturatedFat > 10) adjust -= 4;
+    else if (product.saturatedFat > 5) adjust -= 2;
+    else if (product.saturatedFat < 0.5) adjust += 2;
+  }
+
+  if (product.salt != null) {
+    if (product.salt > 2)    adjust -= 4;
+    else if (product.salt > 1) adjust -= 2;
+    else if (product.salt < 0.1) adjust += 2;
+  }
+
+  if (product.fiber != null) {
+    if (product.fiber >= 6)   adjust += 5;
+    else if (product.fiber >= 3) adjust += 3;
+    else if (product.fiber >= 1.5) adjust += 1;
+  }
+
+  if (product.proteins != null) {
+    if (product.proteins >= 20) adjust += 3;
+    else if (product.proteins >= 10) adjust += 2;
+  }
+
+  if (product.calories != null && product.calories < 5) adjust += 3;
+
+  return Math.max(-10, Math.min(10, adjust));
 }
 
-function scoreSaturatedFat(g) {
-  if (g == null) return null;
-  if (g <= 0.5) return 100;
-  if (g <= 1.5) return 80;
-  if (g <= 3)   return 60;
-  if (g <= 5)   return 40;
-  if (g <= 8)   return 20;
-  return 0;
-}
+function scoreFromNutrients(product) {
+  let score = 100;
 
-function scoreSalt(g) {
-  if (g == null) return null;
-  if (g <= 0.1) return 100;
-  if (g <= 0.3) return 80;
-  if (g <= 0.6) return 60;
-  if (g <= 1)   return 40;
-  if (g <= 1.5) return 20;
-  return 0;
-}
+  if (product.sugar != null) {
+    if (product.sugar > 20)       score -= 35;
+    else if (product.sugar > 12)  score -= 25;
+    else if (product.sugar > 5)   score -= 12;
+    else if (product.sugar > 2)   score -= 5;
+  }
 
-function scoreCalories(kcal) {
-  if (kcal == null) return null;
-  if (kcal <= 20)  return 100;
-  if (kcal <= 80)  return 80;
-  if (kcal <= 150) return 60;
-  if (kcal <= 300) return 40;
-  if (kcal <= 450) return 20;
-  return 0;
-}
+  if (product.saturatedFat != null) {
+    if (product.saturatedFat > 10) score -= 25;
+    else if (product.saturatedFat > 5)  score -= 15;
+    else if (product.saturatedFat > 2)  score -= 7;
+  }
 
-function scoreFat(g) {
-  if (g == null) return null;
-  if (g <= 1)   return 100;
-  if (g <= 5)   return 80;
-  if (g <= 10)  return 60;
-  if (g <= 17)  return 40;
-  if (g <= 25)  return 20;
-  return 0;
-}
+  if (product.salt != null) {
+    if (product.salt > 2)    score -= 20;
+    else if (product.salt > 1)    score -= 12;
+    else if (product.salt > 0.5)  score -= 6;
+  }
 
-// Score d'un nutriment positif : 100 = beaucoup, 0 = pas du tout
-function scoreFiber(g) {
-  if (g == null) return null;
-  if (g >= 6)   return 100;
-  if (g >= 3)   return 70;
-  if (g >= 1.5) return 40;
-  if (g >= 0.5) return 20;
-  return 0;
-}
+  if (product.calories != null) {
+    if (product.calories > 500)      score -= 15;
+    else if (product.calories > 350) score -= 8;
+    else if (product.calories > 200) score -= 4;
+  }
 
-function scoreProteins(g) {
-  if (g == null) return null;
-  if (g >= 20)  return 100;
-  if (g >= 10)  return 70;
-  if (g >= 5)   return 40;
-  if (g >= 2)   return 20;
-  return 0;
+  if (product.fiber != null) {
+    if (product.fiber >= 6)   score += 10;
+    else if (product.fiber >= 3)  score += 6;
+    else if (product.fiber >= 1.5) score += 3;
+  }
+
+  if (product.proteins != null) {
+    if (product.proteins >= 20)   score += 8;
+    else if (product.proteins >= 10)  score += 4;
+  }
+
+  if (product.calories != null && product.calories < 5) score += 10;
+
+  return Math.min(100, Math.max(0, Math.round(score)));
 }
 
 export function calculateScore(product) {
-  const scores = [];
+  const ns = (product.nutriScore || "").toLowerCase();
 
-  // Nutriments négatifs — poids élevé
-  const sugar = scoreSugar(product.sugar);
-  if (sugar !== null) scores.push({ score: sugar, weight: 30 });
+  let score;
 
-  const satFat = scoreSaturatedFat(product.saturatedFat);
-  if (satFat !== null) scores.push({ score: satFat, weight: 20 });
-
-  const salt = scoreSalt(product.salt);
-  if (salt !== null) scores.push({ score: salt, weight: 20 });
-
-  const cal = scoreCalories(product.calories);
-  if (cal !== null) scores.push({ score: cal, weight: 15 });
-
-  const fat = scoreFat(product.fat);
-  if (fat !== null) scores.push({ score: fat, weight: 10 });
-
-  // Nutriments positifs — poids modéré
-  const fiber = scoreFiber(product.fiber);
-  if (fiber !== null) scores.push({ score: fiber, weight: 15 });
-
-  const proteins = scoreProteins(product.proteins);
-  if (proteins !== null) scores.push({ score: proteins, weight: 10 });
-
-  if (scores.length === 0) {
-    // Pas de données → on se base sur le Nutri-Score uniquement
-    const fallback = { a: 85, b: 65, c: 45, d: 25, e: 10 };
-    const ns = (product.nutriScore || "").toLowerCase();
-    return fallback[ns] ?? 50;
+  if (NUTRI_SCORE_BASE[ns] !== undefined) {
+    const base = NUTRI_SCORE_BASE[ns];
+    const adjust = getNutrientAdjustment(product);
+    score = Math.round(base + adjust);
+  } else {
+    score = scoreFromNutrients(product);
   }
 
-  // Moyenne pondérée
-  const totalWeight = scores.reduce((sum, s) => sum + s.weight, 0);
-  const weightedSum = scores.reduce((sum, s) => sum + s.score * s.weight, 0);
-  let score = Math.round(weightedSum / totalWeight);
-
-  // Ajustement Nutri-Score léger (±8 pts max)
-  const nutriAdjust = { a: 8, b: 4, c: 0, d: -5, e: -8 };
-  const ns = (product.nutriScore || "").toLowerCase();
-  if (nutriAdjust[ns] !== undefined) score += nutriAdjust[ns];
+  // Applique le plafond et le plancher selon le Nutri-Score
+  if (NUTRI_SCORE_CAPS[ns] !== undefined) {
+    score = Math.min(score, NUTRI_SCORE_CAPS[ns]);
+    score = Math.max(score, NUTRI_SCORE_FLOORS[ns]);
+  }
 
   return Math.min(100, Math.max(0, score));
 }
