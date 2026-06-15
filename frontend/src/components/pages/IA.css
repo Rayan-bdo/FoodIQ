@@ -1,0 +1,19 @@
+.ia-container { padding: 16px; max-width: 900px; margin: 0 auto; }
+.ia-header { margin-bottom: 12px; }
+.ia-sub { color: var(--muted); margin-top: 6px; }
+.last-scan-card { display:flex; gap:12px; align-items:center; padding:10px; border:1px solid var(--border); border-radius:8px; margin-bottom:12px; background:var(--card-bg); }
+.last-scan-card img { width:72px; height:72px; object-fit:cover; border-radius:6px; }
+.last-scan-info h3 { margin:0; }
+.nutri-line { margin-top:6px; color:var(--muted); }
+.chat-wrapper { display:flex; flex-direction:column; height:60vh; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+.messages { flex:1; padding:12px; overflow:auto; background:var(--bg); }
+.message { margin-bottom:10px; display:flex; }
+.message.user { justify-content:flex-end; }
+.message.assistant { justify-content:flex-start; }
+.msg-content { max-width:75%; padding:10px 12px; border-radius:12px; background:var(--bubble); }
+.message.user .msg-content { background:var(--accent); color:white; }
+.chat-input { display:flex; gap:8px; padding:10px; border-top:1px solid var(--border); background:var(--card-bg); }
+.chat-input textarea { flex:1; resize:none; height:56px; padding:8px; border-radius:8px; border:1px solid var(--border); }
+.chat-input button { padding:10px 14px; border-radius:8px; background:var(--accent); color:white; border:none; }
+
+.ia-fallback-banner { margin: 12px auto 0; max-width: 900px; padding: 10px 14px; background: #f8d7da; color: #842029; border: 1px solid #f5c2c7; border-radius: 8px; }

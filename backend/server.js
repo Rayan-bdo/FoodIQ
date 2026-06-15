@@ -7,7 +7,14 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const path = require("path");
 
-dotenv.config();
+// Charger le .env situé dans le dossier backend (indépendant du cwd de lancement)
+dotenv.config({ path: path.resolve(__dirname, '.env'), override: true });
+
+console.log('ENV status:', {
+  MONGO_URI: !!process.env.MONGO_URI,
+  JWT_SECRET: !!process.env.JWT_SECRET,
+  HUGGINGFACE_API_KEY: !!process.env.HUGGINGFACE_API_KEY,
+});
 
 const app = express();
 app.set("trust proxy", 1);
@@ -38,6 +45,9 @@ app.use("/api", productRoutes);
 
 const scanRoutes = require("./routes/scanRoutes");
 app.use("/api/scans", scanRoutes);
+
+const aiRoutes = require("./routes/aiRoutes");
+app.use("/api/ai", aiRoutes);
 
 // Servir les fichiers statiques du frontend build
 app.use(express.static(path.join(__dirname, '../frontend/build')));
