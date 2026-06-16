@@ -7,65 +7,85 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const path = require("path");
 
-// Charger le .env situé dans le dossier backend (indépendant du cwd de lancement)
-dotenv.config({ path: path.resolve(__dirname, '.env'), override: true });
+// Charger le .env situé dans le dossier backend
+dotenv.config({
+  path: path.resolve(__dirname, ".env"),
+  override: true,
+});
 
-console.log('ENV status:', {
+// Vérification des variables d'environnement
+console.log("ENV status:", {
   MONGO_URI: !!process.env.MONGO_URI,
   JWT_SECRET: !!process.env.JWT_SECRET,
   HUGGINGFACE_API_KEY: !!process.env.HUGGINGFACE_API_KEY,
+  GROQ_API_KEY: !!process.env.GROQ_API_KEY,
 });
 
 const app = express();
+
 app.set("trust proxy", 1);
 
-app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://panic-crystal-accompany.ngrok-free.dev"
-  ],
-  credentials: true
-}));
+// CORS
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "https://panic-crystal-accompany.ngrok-free.dev",
+    ],
+    credentials: true,
+  })
+);
 
 // Middlewares globaux
-app.use(express.json()); // lire JSON
-app.use(cookieParser()); // lire cookies
+app.use(express.json());
+app.use(cookieParser());
 
-// 🔒 (optionnel mais recommandé)
+
+app.use((req, res, next) => {
+  console.log("➡️ REQUEST:", req.method, req.originalUrl);
+  next();
+});
+
+// Rate limiter
 const limiter = require("./security/rateLimiter");
 app.use(limiter);
 
-// Routes
+// Routes Auth
 const authRoutes = require("./routes/authRoutes");
 app.use("/api/auth", authRoutes);
 
-
+// Routes Produits
 const productRoutes = require("./routes/productRoutes");
 app.use("/api", productRoutes);
 
+// Routes Scans
 const scanRoutes = require("./routes/scanRoutes");
 app.use("/api/scans", scanRoutes);
 
+// Routes IA
 const aiRoutes = require("./routes/aiRoutes");
 app.use("/api/ai", aiRoutes);
 
 // Servir les fichiers statiques du frontend build
-app.use(express.static(path.join(__dirname, '../frontend/build')));
+app.use(express.static(path.join(__dirname, "../frontend/build")));
 
-// Middleware pour SPA - servir index.html pour les routes non-API
+// Middleware SPA : servir index.html pour les routes non-API
 app.use((req, res, next) => {
-  if (req.path.startsWith('/api/')) {
+  if (req.path.startsWith("/api/")) {
     return next();
   }
-  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+
+  res.sendFile(path.join(__dirname, "../frontend/build/index.html"));
 });
 
 // Connexion MongoDB
-mongoose.connect(process.env.MONGO_URI)
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
-  .catch(err => console.log("❌ DB error:", err));
+  .catch((err) => console.log("❌ DB error:", err));
 
-//  Lance serveur
+// Lancer serveur
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, "0.0.0.0", () => {

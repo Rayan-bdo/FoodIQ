@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { useLang } from "../../translations/LanguageContext";
 import "./IA.css";
 
+const API_BASE = "http://localhost:5000";
+
 export default function IA() {
   const { t } = useLang();
   const [lastScan, setLastScan] = useState(null);
@@ -11,14 +13,23 @@ export default function IA() {
   const [loading, setLoading] = useState(false);
   const listRef = useRef(null);
 
-  useEffect(() => { fetchLastScan(); }, []);
+  useEffect(() => {
+    fetchLastScan();
+  }, []);
 
   const fetchLastScan = async () => {
     try {
-      const res = await fetch("/api/scans/history", { credentials: "include" });
+      const res = await fetch(`${API_BASE}/api/scans/history`, {
+        credentials: "include",
+      });
+
       if (res.ok) {
         const data = await res.json();
-        if (data && data.length > 0) setLastScan(data[0]);
+        if (data && data.length > 0) {
+          setLastScan(data[0]);
+        }
+      } else {
+        console.warn("Erreur fetch scans:", res.status);
       }
     } catch (err) {
       console.error("Erreur fetch last scan:", err);
@@ -26,34 +37,72 @@ export default function IA() {
   };
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
-    const userMsg = { role: "user", content: input };
+    const currentInput = input.trim();
+    if (!currentInput) return;
+
+    const userMsg = {
+      role: "user",
+      content: currentInput,
+    };
+
     setMessages((m) => [...m, userMsg]);
     setInput("");
     setLoading(true);
+    setFallbackNotice("");
+
     try {
-      const res = await fetch("/api/ai/chat", {
+      const res = await fetch(`${API_BASE}/api/ai/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         credentials: "include",
-        body: JSON.stringify({ message: input, lastScan })
+        body: JSON.stringify({
+          message: currentInput,
+          lastScan,
+        }),
       });
+
+      const data = await res.json().catch(() => ({}));
+
       if (res.ok) {
-        const data = await res.json();
-          setFallbackNotice(data.fallback ? "Mode secours activé : IA externe indisponible, utilisation d'une réponse locale." : "");
-        const botMsg = { role: "assistant", content: data.reply };
+        setFallbackNotice(
+          data.fallback
+            ? "Mode secours activé : IA externe indisponible, utilisation d'une réponse locale."
+            : ""
+        );
+
+        const botMsg = {
+          role: "assistant",
+          content: data.reply || "Aucune réponse reçue.",
+        };
+
         setMessages((m) => [...m, botMsg]);
       } else {
-        const err = await res.json().catch(() => ({}));
-        setMessages((m) => [...m, { role: "assistant", content: err.error || "Erreur serveur" }]);
+        setMessages((m) => [
+          ...m,
+          {
+            role: "assistant",
+            content: data.error || "Erreur serveur",
+          },
+        ]);
       }
     } catch (err) {
       console.error("AI call error:", err);
-      setMessages((m) => [...m, { role: "assistant", content: "Erreur de communication avec le serveur AI." }]);
+
+      setMessages((m) => [
+        ...m,
+        {
+          role: "assistant",
+          content: "Erreur de communication avec le serveur AI.",
+        },
+      ]);
     } finally {
       setLoading(false);
-      // scroll
-      setTimeout(() => listRef.current?.scrollTo(0, listRef.current.scrollHeight), 50);
+
+      setTimeout(() => {
+        listRef.current?.scrollTo(0, listRef.current.scrollHeight);
+      }, 50);
     }
   };
 
@@ -70,7 +119,9 @@ export default function IA() {
           <div className="last-scan-info">
             <h3>{lastScan.productName}</h3>
             <p>{lastScan.brand}</p>
-            <div className="nutri-line">Nutri-score: <strong>{lastScan.nutriScore || '—'}</strong></div>
+            <div className="nutri-line">
+              Nutri-score: <strong>{lastScan.nutriScore || "—"}</strong>
+            </div>
           </div>
         </div>
       )}
@@ -82,15 +133,29 @@ export default function IA() {
               <div className="msg-content">{m.content}</div>
             </div>
           ))}
-          {loading && <div className="message assistant"><div className="msg-content">...</div></div>}
+
+          {loading && (
+            <div className="message assistant">
+              <div className="msg-content">...</div>
+            </div>
+          )}
         </div>
 
         <div className="chat-input">
-          <textarea value={input} onChange={(e) => setInput(e.target.value)} placeholder="Pose ta question sur ce produit ou sur la nutrition..." />
-          <button onClick={sendMessage} disabled={loading}>Envoyer</button>
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Pose ta question sur ce produit ou sur la nutrition..."
+          />
+          <button onClick={sendMessage} disabled={loading}>
+            Envoyer
+          </button>
         </div>
       </div>
-      {fallbackNotice && <div className="ia-fallback-banner">{fallbackNotice}</div>}
+
+      {fallbackNotice && (
+        <div className="ia-fallback-banner">{fallbackNotice}</div>
+      )}
     </div>
   );
 }
