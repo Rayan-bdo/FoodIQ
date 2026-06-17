@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { FaBoxOpen, FaTimes } from "react-icons/fa";
+import React, { useState, useEffect, useRef } from "react";
+import { FaBoxOpen, FaTimes, FaTrash } from "react-icons/fa";
 import { useLang } from "../../translations/LanguageContext";
 import { calculateScore, getScoreColor, getScoreLabel } from "../../utils/scoreUtils";
 import "./Historique.css";
@@ -119,6 +119,132 @@ function formatValue(val, unit) {
   return Number(val).toFixed(1);
 }
 
+/* ---------- Swipeable Scan Card ---------- */
+function SwipeableCard({ scan, onOpen, onDelete, lang, t }) {
+  const [swipeX, setSwipeX] = useState(0);
+  const [swiped, setSwiped] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const startX = useRef(null);
+  const moved = useRef(false);
+  const THRESHOLD = 80;
+
+  const formatDate = (dateStr) => {
+    return new Date(dateStr).toLocaleDateString(
+      lang === "ar" ? "ar-MA" : lang === "en" ? "en-GB" : "fr-FR",
+      { day: "numeric", month: "long", year: "numeric" }
+    );
+  };
+
+  // ===== TOUCH =====
+  const handleTouchStart = (e) => {
+    startX.current = e.touches[0].clientX;
+    moved.current = false;
+  };
+
+  const handleTouchMove = (e) => {
+    if (startX.current == null) return;
+    const diff = e.touches[0].clientX - startX.current;
+    moved.current = true;
+    if (diff < 0) setSwipeX(Math.max(diff, -THRESHOLD));
+    else if (swiped) setSwipeX(Math.min(0, diff - THRESHOLD));
+  };
+
+  const handleTouchEnd = () => {
+    if (swipeX <= -THRESHOLD / 2) {
+      setSwiped(true);
+      setSwipeX(-THRESHOLD);
+    } else {
+      setSwiped(false);
+      setSwipeX(0);
+    }
+    startX.current = null;
+  };
+
+  // ===== MOUSE =====
+  const handleMouseDown = (e) => {
+    startX.current = e.clientX;
+    moved.current = false;
+    setDragging(true);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!dragging || startX.current == null) return;
+    const diff = e.clientX - startX.current;
+    if (Math.abs(diff) > 5) moved.current = true;
+    if (diff < 0) setSwipeX(Math.max(diff, -THRESHOLD));
+    else if (swiped) setSwipeX(Math.min(0, diff - THRESHOLD));
+  };
+
+  const handleMouseUp = () => {
+    if (swipeX <= -THRESHOLD / 2) {
+      setSwiped(true);
+      setSwipeX(-THRESHOLD);
+    } else {
+      setSwiped(false);
+      setSwipeX(0);
+    }
+    setDragging(false);
+    startX.current = null;
+  };
+
+  const handleClick = () => {
+    if (moved.current) return; // ignore si on a glissé
+    if (swiped) {
+      setSwiped(false);
+      setSwipeX(0);
+    } else {
+      onOpen(scan);
+    }
+  };
+
+  return (
+    <div
+      className="swipe-wrapper"
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+    >
+      {/* Bouton supprimer derrière */}
+      <button
+        className="delete-btn"
+        onClick={(e) => { e.stopPropagation(); onDelete(scan._id); }}
+      >
+        <FaTrash />
+      </button>
+
+      {/* Carte */}
+      <div
+        className="scan-card"
+        style={{
+          transform: `translateX(${swipeX}px)`,
+          transition: dragging ? "none" : "transform 0.3s ease",
+          cursor: dragging ? "grabbing" : "grab",
+          userSelect: "none",
+        }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onMouseDown={handleMouseDown}
+        onClick={handleClick}
+      >
+        <div className="scan-image">
+          {scan.image ? (
+            <img src={scan.image} alt={scan.productName} draggable={false} />
+          ) : (
+            <FaBoxOpen className="scan-placeholder-icon" />
+          )}
+        </div>
+        <div className="scan-info">
+          <h4 className="scan-name">{scan.productName || t("unknownProduct")}</h4>
+          <p className="scan-brand">{scan.brand || "—"}</p>
+          <p className="scan-date">📅 {formatDate(scan.scannedAt)}</p>
+        </div>
+        <MiniScore scan={scan} lang={lang} />
+      </div>
+    </div>
+  );
+}
+
 /* ---------- Modal produit ---------- */
 function ProductModal({ scan, onClose, lang, t }) {
   const { qualities, defauts } = analyzeProduct(scan, t);
@@ -135,40 +261,27 @@ function ProductModal({ scan, onClose, lang, t }) {
     { key: "fiber", label: t("fiber"), unit: "g", icon: "🥦" },
   ].filter((n) => scan[n.key] != null);
 
-  // Adapter les clés du scan aux clés du produit
   const product = {
-    name: scan.productName,
-    brand: scan.brand,
-    image: scan.image,
     nutriScore: scan.nutriScore,
-    calories: scan.calories,
-    proteins: scan.proteins,
-    carbs: scan.carbs,
-    fat: scan.fat,
-    saturatedFat: scan.saturatedFat,
-    sugar: scan.sugar,
-    salt: scan.salt,
-    sodium: scan.sodium,
-    fiber: scan.fiber,
+    calories: scan.calories, proteins: scan.proteins, carbs: scan.carbs,
+    fat: scan.fat, saturatedFat: scan.saturatedFat, sugar: scan.sugar,
+    salt: scan.salt, sodium: scan.sodium, fiber: scan.fiber,
   };
 
   return (
     <div className="histo-modal-overlay" onClick={onClose}>
       <div className="histo-modal" onClick={(e) => e.stopPropagation()}>
-        {/* Bouton fermer */}
         <button className="histo-modal-close" onClick={onClose}><FaTimes /></button>
 
-        {/* Header produit */}
         <div className="histo-modal-header">
-          {product.image && <img src={product.image} alt="" className="histo-modal-img" />}
+          {scan.image && <img src={scan.image} alt="" className="histo-modal-img" />}
           <div style={{ flex: 1 }}>
-            <h2 className="histo-modal-name">{product.name}</h2>
-            <p className="histo-modal-brand">{product.brand}</p>
+            <h2 className="histo-modal-name">{scan.productName}</h2>
+            <p className="histo-modal-brand">{scan.brand}</p>
           </div>
           <ScoreCircle scan={product} lang={lang} />
         </div>
 
-        {/* DÉFAUTS */}
         {defauts.length > 0 && (
           <div className="histo-modal-section">
             <h3 className="histo-modal-section-title defaut-title">⚠️ {t("defauts")}</h3>
@@ -186,7 +299,6 @@ function ProductModal({ scan, onClose, lang, t }) {
           </div>
         )}
 
-        {/* QUALITÉS */}
         {qualities.length > 0 && (
           <div className="histo-modal-section">
             <h3 className="histo-modal-section-title qualite-title">✅ {t("qualites")}</h3>
@@ -204,7 +316,6 @@ function ProductModal({ scan, onClose, lang, t }) {
           </div>
         )}
 
-        {/* VALEURS NUTRITIONNELLES */}
         {allNutrients.length > 0 && (
           <div className="histo-modal-section">
             <h3 className="histo-modal-section-title">{t("nutritionValues")} <span className="per100">pour 100g</span></h3>
@@ -251,11 +362,18 @@ export default function Historique() {
     }
   };
 
-  const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString(
-      lang === "ar" ? "ar-MA" : lang === "en" ? "en-GB" : "fr-FR",
-      { day: "numeric", month: "long", year: "numeric" }
-    );
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetch(`/api/scans/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (res.ok) {
+        setHistory((prev) => prev.filter((s) => s._id !== id));
+      }
+    } catch (err) {
+      console.error("Erreur suppression:", err);
+    }
   };
 
   if (loading) {
@@ -291,32 +409,19 @@ export default function Historique() {
         </div>
       ) : (
         <div className="historique-list">
-          {history.map((scan, index) => (
-            <div key={index} className="scan-card" onClick={() => setSelectedScan(scan)}>
-              {/* IMAGE */}
-              <div className="scan-image">
-                {scan.image ? (
-                  <img src={scan.image} alt={scan.productName} />
-                ) : (
-                  <FaBoxOpen className="scan-placeholder-icon" />
-                )}
-              </div>
-
-              {/* INFO */}
-              <div className="scan-info">
-                <h4 className="scan-name">{scan.productName || t("unknownProduct")}</h4>
-                <p className="scan-brand">{scan.brand || "—"}</p>
-                <p className="scan-date">📅 {formatDate(scan.scannedAt)}</p>
-              </div>
-
-              {/* SCORE */}
-              <MiniScore scan={scan} lang={lang} />
-            </div>
+          {history.map((scan) => (
+            <SwipeableCard
+              key={scan._id}
+              scan={scan}
+              onOpen={setSelectedScan}
+              onDelete={handleDelete}
+              lang={lang}
+              t={t}
+            />
           ))}
         </div>
       )}
 
-      {/* MODAL */}
       {selectedScan && (
         <ProductModal
           scan={selectedScan}
