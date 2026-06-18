@@ -2,6 +2,14 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "Lax",
+  path: "/",
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 jours en ms — cohérent avec expiresIn: "7d"
+};
+
 // ====================== LOGIN ======================
 exports.login = async (req, res) => {
   console.log("Login request received:", req.body);
@@ -28,15 +36,10 @@ exports.login = async (req, res) => {
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "7d" }
     );
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
-      path: "/"
-    });
+    res.cookie("token", token, COOKIE_OPTIONS);
 
     return res.status(200).json({
       message: "Login successful",
@@ -72,15 +75,10 @@ exports.register = async (req, res) => {
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "7d" }
     );
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
-      path: "/"
-    });
+    res.cookie("token", token, COOKIE_OPTIONS);
 
     return res.status(201).json({
       message: "User created",
@@ -119,7 +117,6 @@ exports.updateProfile = async (req, res) => {
       return res.status(400).json({ error: "Email invalide" });
     }
 
-    // Vérifie si l'email est déjà pris par un autre utilisateur
     const existing = await User.findOne({ email, _id: { $ne: userId } });
     if (existing) {
       return res.status(400).json({ error: "Cet email est déjà utilisé" });
