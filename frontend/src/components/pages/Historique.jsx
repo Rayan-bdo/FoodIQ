@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaBoxOpen, FaTimes } from "react-icons/fa";
+import { FaBoxOpen, FaTimes, FaTrash } from "react-icons/fa";
 import { useLang } from "../../translations/LanguageContext";
 import { calculateScore, getScoreColor, getScoreLabel } from "../../utils/scoreUtils";
 import "./Historique.css";
@@ -120,7 +120,7 @@ function formatValue(val, unit) {
 }
 
 /* ---------- Modal produit ---------- */
-function ProductModal({ scan, onClose, lang, t }) {
+function ProductModal({ scan, onClose, onDelete, lang, t }) {
   const { qualities, defauts } = analyzeProduct(scan, t);
 
   const allNutrients = [
@@ -135,40 +135,28 @@ function ProductModal({ scan, onClose, lang, t }) {
     { key: "fiber", label: t("fiber"), unit: "g", icon: "🥦" },
   ].filter((n) => scan[n.key] != null);
 
-  // Adapter les clés du scan aux clés du produit
   const product = {
-    name: scan.productName,
-    brand: scan.brand,
-    image: scan.image,
     nutriScore: scan.nutriScore,
-    calories: scan.calories,
-    proteins: scan.proteins,
-    carbs: scan.carbs,
-    fat: scan.fat,
-    saturatedFat: scan.saturatedFat,
-    sugar: scan.sugar,
-    salt: scan.salt,
-    sodium: scan.sodium,
-    fiber: scan.fiber,
+    calories: scan.calories, proteins: scan.proteins, carbs: scan.carbs,
+    fat: scan.fat, saturatedFat: scan.saturatedFat, sugar: scan.sugar,
+    salt: scan.salt, sodium: scan.sodium, fiber: scan.fiber,
   };
 
   return (
     <div className="histo-modal-overlay" onClick={onClose}>
       <div className="histo-modal" onClick={(e) => e.stopPropagation()}>
-        {/* Bouton fermer */}
+
         <button className="histo-modal-close" onClick={onClose}><FaTimes /></button>
 
-        {/* Header produit */}
         <div className="histo-modal-header">
-          {product.image && <img src={product.image} alt="" className="histo-modal-img" />}
+          {scan.image && <img src={scan.image} alt="" className="histo-modal-img" />}
           <div style={{ flex: 1 }}>
-            <h2 className="histo-modal-name">{product.name}</h2>
-            <p className="histo-modal-brand">{product.brand}</p>
+            <h2 className="histo-modal-name">{scan.productName}</h2>
+            <p className="histo-modal-brand">{scan.brand}</p>
           </div>
           <ScoreCircle scan={product} lang={lang} />
         </div>
 
-        {/* DÉFAUTS */}
         {defauts.length > 0 && (
           <div className="histo-modal-section">
             <h3 className="histo-modal-section-title defaut-title">⚠️ {t("defauts")}</h3>
@@ -186,7 +174,6 @@ function ProductModal({ scan, onClose, lang, t }) {
           </div>
         )}
 
-        {/* QUALITÉS */}
         {qualities.length > 0 && (
           <div className="histo-modal-section">
             <h3 className="histo-modal-section-title qualite-title">✅ {t("qualites")}</h3>
@@ -204,7 +191,6 @@ function ProductModal({ scan, onClose, lang, t }) {
           </div>
         )}
 
-        {/* VALEURS NUTRITIONNELLES */}
         {allNutrients.length > 0 && (
           <div className="histo-modal-section">
             <h3 className="histo-modal-section-title">{t("nutritionValues")} <span className="per100">pour 100g</span></h3>
@@ -219,6 +205,15 @@ function ProductModal({ scan, onClose, lang, t }) {
             </div>
           </div>
         )}
+
+        {/* BOUTON SUPPRIMER */}
+        <button
+          className="histo-delete-btn"
+          onClick={() => { onDelete(scan._id); onClose(); }}
+        >
+          <FaTrash /> {t("Supprimer Scan")}
+        </button>
+
       </div>
     </div>
   );
@@ -232,22 +227,38 @@ export default function Historique() {
   const [error, setError] = useState("");
   const [selectedScan, setSelectedScan] = useState(null);
 
-  useEffect(() => { fetchHistory(); }, []);
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const res = await fetch("/api/scans/history", { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          setHistory(data);
+        } else {
+          setError(t("historyError"));
+        }
+      } catch (err) {
+        console.error("Erreur fetch historique:", err);
+        setError(t("serverError"));
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const fetchHistory = async () => {
+    fetchHistory();
+  }, [t]);
+
+  const handleDelete = async (id) => {
     try {
-      const res = await fetch("/api/scans/history", { credentials: "include" });
+      const res = await fetch(`/api/scans/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
       if (res.ok) {
-        const data = await res.json();
-        setHistory(data);
-      } else {
-        setError(t("historyError"));
+        setHistory((prev) => prev.filter((s) => s._id !== id));
       }
     } catch (err) {
-      console.error("Erreur fetch historique:", err);
-      setError(t("serverError"));
-    } finally {
-      setLoading(false);
+      console.error("Erreur suppression:", err);
     }
   };
 
@@ -291,9 +302,8 @@ export default function Historique() {
         </div>
       ) : (
         <div className="historique-list">
-          {history.map((scan, index) => (
-            <div key={index} className="scan-card" onClick={() => setSelectedScan(scan)}>
-              {/* IMAGE */}
+          {history.map((scan) => (
+            <div key={scan._id} className="scan-card" onClick={() => setSelectedScan(scan)}>
               <div className="scan-image">
                 {scan.image ? (
                   <img src={scan.image} alt={scan.productName} />
@@ -301,26 +311,22 @@ export default function Historique() {
                   <FaBoxOpen className="scan-placeholder-icon" />
                 )}
               </div>
-
-              {/* INFO */}
               <div className="scan-info">
                 <h4 className="scan-name">{scan.productName || t("unknownProduct")}</h4>
                 <p className="scan-brand">{scan.brand || "—"}</p>
                 <p className="scan-date">📅 {formatDate(scan.scannedAt)}</p>
               </div>
-
-              {/* SCORE */}
               <MiniScore scan={scan} lang={lang} />
             </div>
           ))}
         </div>
       )}
 
-      {/* MODAL */}
       {selectedScan && (
         <ProductModal
           scan={selectedScan}
           onClose={() => setSelectedScan(null)}
+          onDelete={handleDelete}
           lang={lang}
           t={t}
         />
