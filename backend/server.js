@@ -1,19 +1,15 @@
-// backend/server.js
-
 const express = require("express");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const path = require("path");
-
-// Charger le .env situé dans le dossier backend
+const helmet = require("helmet");
 dotenv.config({
   path: path.resolve(__dirname, ".env"),
   override: true,
 });
 
-// Vérification des variables d'environnement
 console.log("ENV status:", {
   MONGO_URI: !!process.env.MONGO_URI,
   JWT_SECRET: !!process.env.JWT_SECRET,
@@ -22,72 +18,70 @@ console.log("ENV status:", {
 });
 
 const app = express();
-
 app.set("trust proxy", 1);
 
-// CORS
-app.use(
-  cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:5173",
-      "https://panic-crystal-accompany.ngrok-free.dev",
-    ],
-    credentials: true,
-  })
-);
+// ── Helmet (headers de sécurité HTTP) ───────────────────────────────────────
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https://api.groq.com"],
+    },
+  },
+}));
 
-// Middlewares globaux
-app.use(express.json());
+app.use(cors({
+  origin: [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://panic-crystal-accompany.ngrok-free.dev",
+  ],
+  credentials: true,
+}));
+
+app.use(express.json({ limit: "10kb" }));
 app.use(cookieParser());
-
 
 app.use((req, res, next) => {
   console.log("➡️ REQUEST:", req.method, req.originalUrl);
   next();
 });
 
-// Rate limiter
-const limiter = require("./security/rateLimiter");
-app.use(limiter);
+// ── Rate limiters ────────────────────────────────────────────────────────────
+const { globalLimiter, authLimiter } = require("./security/rateLimiter");
+app.use(globalLimiter); // global sur toutes les routes
 
-// Routes Auth
+// ── Routes ───────────────────────────────────────────────────────────────────
 const authRoutes = require("./routes/authRoutes");
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authLimiter, authRoutes); // 5 tentatives/15min sur login
 
-// Routes Produits
 const productRoutes = require("./routes/productRoutes");
 app.use("/api", productRoutes);
 
-// Routes Scans
 const scanRoutes = require("./routes/scanRoutes");
 app.use("/api/scans", scanRoutes);
 
-// Routes IA
 const aiRoutes = require("./routes/aiRoutes");
-app.use("/api/ai", aiRoutes);
+app.use("/api/ai", aiRoutes); // aiLimiter appliqué dans aiRoutes.js
 
-// Servir les fichiers statiques du frontend build
+// ── Frontend static ──────────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, "../frontend/build")));
-
-// Middleware SPA : servir index.html pour les routes non-API
 app.use((req, res, next) => {
-  if (req.path.startsWith("/api/")) {
-    return next();
-  }
-
+  if (req.path.startsWith("/api/")) return next();
   res.sendFile(path.join(__dirname, "../frontend/build/index.html"));
 });
 
-// Connexion MongoDB
+// ── MongoDB ──────────────────────────────────────────────────────────────────
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.log("❌ DB error:", err));
 
-// Lancer serveur
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
