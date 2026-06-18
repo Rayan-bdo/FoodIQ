@@ -211,7 +211,7 @@ function ProductModal({ scan, onClose, onDelete, lang, t }) {
           className="histo-delete-btn"
           onClick={() => { onDelete(scan._id); onClose(); }}
         >
-          <FaTrash /> {t("deleteScan")}
+          <FaTrash /> {t("Supprimer Scan")}
         </button>
 
       </div>
@@ -227,24 +227,26 @@ export default function Historique() {
   const [error, setError] = useState("");
   const [selectedScan, setSelectedScan] = useState(null);
 
-  useEffect(() => { fetchHistory(); }, []);
-
-  const fetchHistory = async () => {
-    try {
-      const res = await fetch("/api/scans/history", { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        setHistory(data);
-      } else {
-        setError(t("historyError"));
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const res = await fetch("/api/scans/history", { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          setHistory(data);
+        } else {
+          setError(t("historyError"));
+        }
+      } catch (err) {
+        console.error("Erreur fetch historique:", err);
+        setError(t("serverError"));
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Erreur fetch historique:", err);
-      setError(t("serverError"));
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    fetchHistory();
+  }, [t]);
 
   const handleDelete = async (id) => {
     try {
