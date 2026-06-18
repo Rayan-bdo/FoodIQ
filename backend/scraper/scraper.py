@@ -1,6 +1,7 @@
 import sys
 import json
 import time
+import os
 from concurrent.futures import ThreadPoolExecutor
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -10,7 +11,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
-CHROMEDRIVER_PATH = r"C:\Users\A\Desktop\FoodIQ\backend\scraper\chromedriver.exe"
+# Chemin relatif — fonctionne sur toutes les machines
+CHROMEDRIVER_PATH = os.path.join(os.path.dirname(__file__), "chromedriver.exe")
 
 
 def make_browser():
@@ -19,7 +21,6 @@ def make_browser():
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option("useAutomationExtension", False)
-    # Don't actually load/render images - we only need the image URLs from the HTML
     options.add_experimental_option("prefs", {
         "profile.managed_default_content_settings.images": 2
     })
@@ -157,13 +158,12 @@ def scrape_aswak(query):
 def scrape_all(query):
     results = []
 
-    # Run both store scrapers AT THE SAME TIME instead of one after another
     with ThreadPoolExecutor(max_workers=2) as executor:
         future_marjane = executor.submit(scrape_marjane, query)
-        future_aswak = executor.submit(scrape_aswak, query)
+        future_aswak   = executor.submit(scrape_aswak, query)
 
         marjane_results = future_marjane.result()
-        aswak_results = future_aswak.result()
+        aswak_results   = future_aswak.result()
 
     results.extend(marjane_results)
     results.extend(aswak_results)

@@ -3,7 +3,7 @@ import { Html5Qrcode } from "html5-qrcode";
 import { useNavigate } from "react-router-dom";
 import { useLang } from "../../translations/LanguageContext";
 import { calculateScore, getScoreColor, getScoreLabel } from "../../utils/scoreUtils";
-import "./scanner.css";
+import "./Scanner.css";
 
 /* ---------- Helpers ---------- */
 const NUTRI_BG = {
