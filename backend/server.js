@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const path = require("path");
 const helmet = require("helmet");
+
 dotenv.config({
   path: path.resolve(__dirname, ".env"),
   override: true,
@@ -20,27 +21,7 @@ console.log("ENV status:", {
 const app = express();
 app.set("trust proxy", 1);
 
-<<<<<<< HEAD
-app.use(express.json());
-app.use(cookieParser());
-
-app.use((req, res, next) => {
-  console.log(`📥 [${new Date().toISOString()}] ${req.method} ${req.path}`);
-  next();
-});
-
-app.get("/api/test", (req, res) => {
-  console.log("✅ Test endpoint hit!");
-  res.json({ message: "Backend is working!" });
-});
-
-console.log("📝 Test route registered");
-
-const authRoutes = require("./routes/authRoutes");
-app.use("/api/auth", authRoutes);
-console.log("📝 Auth routes registered");
-=======
-// ── Helmet (headers de sécurité HTTP) ───────────────────────────────────────
+// ── Helmet ───────────────────────────────────────────────────────────────────
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   contentSecurityPolicy: {
@@ -54,6 +35,7 @@ app.use(helmet({
   },
 }));
 
+// ── CORS ─────────────────────────────────────────────────────────────────────
 app.use(cors({
   origin: [
     "http://localhost:3000",
@@ -71,43 +53,37 @@ app.use((req, res, next) => {
   next();
 });
 
-// ── Rate limiters ────────────────────────────────────────────────────────────
+// ── Rate limiters ─────────────────────────────────────────────────────────────
 const { globalLimiter, authLimiter } = require("./security/rateLimiter");
-app.use(globalLimiter); // global sur toutes les routes
+app.use(globalLimiter);
 
-// ── Routes ───────────────────────────────────────────────────────────────────
+// ── Routes ────────────────────────────────────────────────────────────────────
 const authRoutes = require("./routes/authRoutes");
-app.use("/api/auth", authLimiter, authRoutes); // 5 tentatives/15min sur login
+app.use("/api/auth", authLimiter, authRoutes);
 
 const productRoutes = require("./routes/productRoutes");
 app.use("/api", productRoutes);
->>>>>>> 2597a1e0c5e6ecb78cb96bcf73b6271af73f6708
 
 const scanRoutes = require("./routes/scanRoutes");
 app.use("/api/scans", scanRoutes);
 
-<<<<<<< HEAD
-// ✅ SCRAPE ROUTES
+const aiRoutes = require("./routes/aiRoutes");
+app.use("/api/ai", aiRoutes);
+
+// ── Route scrape (ajout de ton ami) ──────────────────────────────────────────
 const scrapeRoutes = require("./routes/scrapeRoutes");
 app.use("/api/scrape", scrapeRoutes);
-console.log("📝 Scrape routes registered");
 
-mongoose.connect(process.env.MONGO_URI)
-=======
-const aiRoutes = require("./routes/aiRoutes");
-app.use("/api/ai", aiRoutes); // aiLimiter appliqué dans aiRoutes.js
-
-// ── Frontend static ──────────────────────────────────────────────────────────
+// ── Frontend static ───────────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, "../frontend/build")));
 app.use((req, res, next) => {
   if (req.path.startsWith("/api/")) return next();
   res.sendFile(path.join(__dirname, "../frontend/build/index.html"));
 });
 
-// ── MongoDB ──────────────────────────────────────────────────────────────────
+// ── MongoDB ───────────────────────────────────────────────────────────────────
 mongoose
   .connect(process.env.MONGO_URI)
->>>>>>> 2597a1e0c5e6ecb78cb96bcf73b6271af73f6708
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.log("❌ DB error:", err));
 
