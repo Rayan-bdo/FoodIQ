@@ -6,7 +6,7 @@ import { LanguageProvider } from "./translations/LanguageContext";
 import PrivateRoute from './components/PrivateRoute';
 
 // PAGES
-import Scanner from './components/pages/Scanner';
+import Scanner from './components/pages/scanner';
 import Historique from './components/pages/Historique';
 import IA from './components/pages/IA';
 import Recherche from './components/pages/Recherche';

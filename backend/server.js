@@ -12,50 +12,37 @@ dotenv.config();
 const app = express();
 app.set("trust proxy", 1);
 
-app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://panic-crystal-accompany.ngrok-free.dev"
-  ],
-  credentials: true
-}));
+app.use(express.json());
+app.use(cookieParser());
 
-// Middlewares globaux
-app.use(express.json()); // lire JSON
-app.use(cookieParser()); // lire cookies
+app.use((req, res, next) => {
+  console.log(`📥 [${new Date().toISOString()}] ${req.method} ${req.path}`);
+  next();
+});
 
-// 🔒 (optionnel mais recommandé)
-const limiter = require("./security/rateLimiter");
-app.use(limiter);
+app.get("/api/test", (req, res) => {
+  console.log("✅ Test endpoint hit!");
+  res.json({ message: "Backend is working!" });
+});
 
-// Routes
+console.log("📝 Test route registered");
+
 const authRoutes = require("./routes/authRoutes");
 app.use("/api/auth", authRoutes);
-
-
-const productRoutes = require("./routes/productRoutes");
-app.use("/api", productRoutes);
+console.log("📝 Auth routes registered");
 
 const scanRoutes = require("./routes/scanRoutes");
 app.use("/api/scans", scanRoutes);
 
-// Servir les fichiers statiques du frontend build
-app.use(express.static(path.join(__dirname, '../frontend/build')));
+// ✅ SCRAPE ROUTES
+const scrapeRoutes = require("./routes/scrapeRoutes");
+app.use("/api/scrape", scrapeRoutes);
+console.log("📝 Scrape routes registered");
 
-// Middleware pour SPA - servir index.html pour les routes non-API
-app.use((req, res, next) => {
-  if (req.path.startsWith('/api/')) {
-    return next();
-  }
-  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
-});
-
-// Connexion MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch(err => console.log("❌ DB error:", err));
 
-//  Lance serveur
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, "0.0.0.0", () => {
