@@ -1,6 +1,14 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
+const csv = require("csv-parser");
+const fs = require("fs");
+const Product = require("../models/Product");
 
+// Configure multer for file uploads
+const upload = multer({ dest: "uploads/" });
+
+// Barcode lookup endpoint (kept from original)
 router.get("/product/:barcode", async (req, res) => {
   const barcode = req.params.barcode;
   const lang = req.query.lang || "fr";
@@ -27,7 +35,6 @@ router.get("/product/:barcode", async (req, res) => {
       data.product.product_name ||
       "Nom non disponible";
 
-    // ← Essaie les deux champs possibles pour le Nutri-Score
     const nutriScore =
       data.product.nutri_score_grade ||
       data.product.nutrition_grade_fr ||
@@ -53,6 +60,118 @@ router.get("/product/:barcode", async (req, res) => {
   } catch (err) {
     console.error("ERREUR BACKEND :", err);
     return res.status(500).json({ error: "Erreur serveur" });
+  }
+});
+
+// Import CSV products from scraper
+router.post("/products/import", upload.single("file"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const retailer = req.body.retailer || "marjane";
+    const products = [];
+
+    // Parse CSV file
+    fs.createReadStream(req.file.path)
+      .pipe(csv())
+      .on("data", (row) => {
+        products.push({
+          idProduits: parseInt(row.idProduits) || 0,
+          titres: row.titres,
+          prix: row.prix,
+          url: row.url,
+          retailer: retailer,
+          category: "beverages",
+          searchKeyword: "lait",
+        });
+      })
+      .on("end", async () => {
+        try {
+          // Clear existing products for this retailer
+          await Product.deleteMany({ retailer });
+
+          // Insert new products
+          const result = await Product.insertMany(products);
+
+          // Clean up uploaded file
+          fs.unlinkSync(req.file.path);
+
+          return res.json({
+            success: true,
+            message: `✓ Imported ${result.length} products from ${retailer}`,
+            productsCount: result.length,
+          });
+        } catch (err) {
+          console.error("Import error:", err);
+          fs.unlinkSync(req.file.path);
+          return res.status(500).json({ error: "Error saving products to database" });
+        }
+      })
+      .on("error", (err) => {
+        fs.unlinkSync(req.file.path);
+        return res.status(400).json({ error: "Error parsing CSV file" });
+      });
+  } catch (err) {
+    console.error("Upload error:", err);
+    return res.status(500).json({ error: "Upload error" });
+  }
+});
+
+// Search products from database
+router.get("/products/search", async (req, res) => {
+  const { q, retailer } = req.query;
+
+  try {
+    let filter = {};
+
+    // Search by title
+    if (q) {
+      filter.titres = { $regex: q, $options: "i" };
+    }
+
+    // Filter by retailer
+    if (retailer && retailer !== "all") {
+      filter.retailer = retailer;
+    }
+
+    // Query database
+    const products = await Product.find(filter).limit(50);
+
+    return res.json(products);
+  } catch (err) {
+    console.error("Search error:", err);
+    return res.status(500).json({ error: "Search error" });
+  }
+});
+
+// Get all products (paginated)
+router.get("/products", async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const products = await Product.find()
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    const total = await Product.countDocuments();
+
+    return res.json({
+      products,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        total,
+        limit,
+      },
+    });
+  } catch (err) {
+    console.error("Error fetching products:", err);
+    return res.status(500).json({ error: "Error fetching products" });
   }
 });
 

@@ -1,0 +1,175 @@
+.recherche-container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: sans-serif;
+}
+
+.recherche-title {
+  text-align: center;
+  font-size: 1.8rem;
+  margin-bottom: 24px;
+  color: #333;
+}
+
+.recherche-form {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.recherche-input {
+  padding: 12px 16px;
+  font-size: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  width: 400px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.recherche-input:focus {
+  border-color: #e8281e;
+}
+
+.recherche-btn {
+  padding: 12px 24px;
+  background-color: #e8281e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.recherche-btn:hover:not(:disabled) {
+  background-color: #c41f16;
+}
+
+.recherche-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading */
+.recherche-loading {
+  text-align: center;
+  color: #666;
+  margin-top: 40px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #eee;
+  border-top: 4px solid #e8281e;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Messages */
+.recherche-error {
+  text-align: center;
+  color: red;
+  margin-top: 20px;
+}
+
+.recherche-empty {
+  text-align: center;
+  color: #888;
+  margin-top: 20px;
+}
+
+.recherche-count {
+  color: #555;
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+}
+
+/* Grid */
+.recherche-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+/* Product card */
+.product-card {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.2s, transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.store-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  color: white;
+  z-index: 2;
+}
+
+.badge-marjane {
+  background-color: #e8281e;
+}
+
+.badge-aswak {
+  background-color: #1e6fa8;
+}
+
+.product-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  transform: translateY(-3px);
+}
+
+.product-image {
+  width: 100%;
+  height: 160px;
+  object-fit: contain;
+  background: #f9f9f9;
+  padding: 10px;
+}
+
+.product-info {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.product-titre {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+}
+
+.product-prix {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #e8281e;
+  margin: 0;
+}
+
+.product-link {
+  font-size: 0.82rem;
+  color: #888;
+  margin-top: auto;
+}
