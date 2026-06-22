@@ -211,7 +211,7 @@ function ProductModal({ scan, onClose, onDelete, lang, t }) {
           className="histo-delete-btn"
           onClick={() => { onDelete(scan._id); onClose(); }}
         >
-          <FaTrash /> {t("Supprimer Scan")}
+          <FaTrash /> {t("")}
         </button>
 
       </div>
