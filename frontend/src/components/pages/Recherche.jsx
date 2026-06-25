@@ -52,7 +52,6 @@ export default function Recherche() {
         </button>
       </form>
 
-      {/* Loading spinner */}
       {loading && (
         <div className="recherche-loading">
           <div className="spinner"></div>
@@ -60,15 +59,12 @@ export default function Recherche() {
         </div>
       )}
 
-      {/* Error message */}
       {error && <p className="recherche-error">{error}</p>}
 
-      {/* No results */}
       {searched && !loading && !error && results.length === 0 && (
         <p className="recherche-empty">Aucun produit trouvé pour "{query}".</p>
       )}
 
-      {/* Results grid */}
       {results.length > 0 && (
         <div className="recherche-results">
           <p className="recherche-count">{results.length} produit(s) trouvé(s)</p>
@@ -79,11 +75,11 @@ export default function Recherche() {
                 href={product.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="product-card"
+                className="rsearch-card"
               >
                 <span
-                  className={`store-badge ${
-                    product.magasin === "Marjane" ? "badge-marjane" : "badge-aswak"
+                  className={`rsearch-store-badge ${
+                    product.magasin === "Marjane" ? "rsearch-badge-marjane" : "rsearch-badge-aswak"
                   }`}
                 >
                   {product.magasin}
@@ -93,15 +89,15 @@ export default function Recherche() {
                   <img
                     src={product.image}
                     alt={product.titre}
-                    className="product-image"
+                    className="rsearch-image"
                   />
                 )}
-                <div className="product-info">
-                  <h3 className="product-titre">{product.titre}</h3>
+                <div className="rsearch-info">
+                  <h3 className="rsearch-titre">{product.titre}</h3>
                   {product.prix && (
-                    <p className="product-prix">{product.prix}</p>
+                    <p className="rsearch-prix">{product.prix}</p>
                   )}
-                  <span className="product-link">Voir le produit →</span>
+                  <span className="rsearch-link">Voir le produit →</span>
                 </div>
               </a>
             ))}

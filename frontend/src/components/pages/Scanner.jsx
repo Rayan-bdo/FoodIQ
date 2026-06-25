@@ -95,16 +95,11 @@ function ScoreCircle({ score, lang, ns }) {
 
   return (
     <div className="score-group">
-      {/* Badge lettre Nutri-Score */}
       {ns && (
-        <div
-          className="nutri-letter-only"
-          style={{ background: NUTRI_BG[ns] }}
-        >
+        <div className="nutri-letter-only" style={{ background: NUTRI_BG[ns] }}>
           {ns.toUpperCase()}
         </div>
       )}
-      {/* Cercle score */}
       <div className="score-circle-wrapper">
         <svg width="80" height="80" viewBox="0 0 80 80">
           <circle cx="40" cy="40" r={radius} fill="none" stroke="var(--border)" strokeWidth="6" />
@@ -119,8 +114,8 @@ function ScoreCircle({ score, lang, ns }) {
   );
 }
 
-/* ---------- Product ---------- */
-function ProductResult({ product }) {
+/* ---------- ProductResult ---------- */
+function ProductResult({ product, alternatives, altLoading }) {
   const { t, lang } = useLang();
   const ns = product.nutriScore?.toLowerCase();
   const score = calculateScore(product);
@@ -138,6 +133,9 @@ function ProductResult({ product }) {
     { key: "fiber",        label: t("fiber"),        unit: "g",    icon: "🥦" },
   ].filter((n) => product[n.key] != null);
 
+  const nutriScoreUpper = product.nutriScore?.toUpperCase();
+  const isGoodScore = ["A", "B"].includes(nutriScoreUpper);
+
   return (
     <div className="product-result">
 
@@ -149,7 +147,6 @@ function ProductResult({ product }) {
             <h2>{product.name}</h2>
             <p className="brand">{product.brand}</p>
           </div>
-          {/* Badge lettre + cercle score côte à côte */}
           <ScoreCircle score={score} lang={lang} ns={ns} />
         </div>
       </div>
@@ -208,6 +205,59 @@ function ProductResult({ product }) {
         </div>
       </div>
 
+      {/* ALTERNATIVES PLUS SAINES */}
+      <div className="analysis-section">
+        <h3 className="analysis-title alternatives-title">🥗 Alternatives plus saines</h3>
+
+        {altLoading && (
+          <div className="alt-loading">
+            <div className="alt-spinner" />
+            <p>Recherche en cours sur Marjane & Aswak Assalam…</p>
+          </div>
+        )}
+
+        {!altLoading && alternatives.length === 0 && (
+          <p className="alt-empty">
+            {isGoodScore
+              ? `✅ Ce produit a déjà un bon Nutri-Score (${nutriScoreUpper}). Pas d'alternative nécessaire !`
+              : "Aucune alternative plus saine trouvée pour ce produit."
+            }
+          </p>
+        )}
+
+        {!altLoading && alternatives.length > 0 && (
+          <div className="alt-grid">
+            {alternatives.map((alt, i) => (
+              <a
+                key={i}
+                href={alt.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="alt-card"
+              >
+                {alt.image
+                  ? <img src={alt.image} alt={alt.titre} className="alt-image" />
+                  : <div className="alt-image alt-image-placeholder">🛒</div>
+                }
+                <div className="alt-body">
+                  <p className="alt-titre">{alt.titre}</p>
+                  <div className="alt-footer">
+                    <span
+                      className="alt-nutri-badge"
+                      style={{ background: NUTRI_BG[alt.nutriScore?.toLowerCase()] || "#ccc" }}
+                    >
+                      {alt.nutriScore}
+                    </span>
+                    <span className="alt-magasin">{alt.magasin}</span>
+                    <span className="alt-prix">{alt.prix}</span>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }
@@ -228,6 +278,8 @@ export default function Scanner() {
   const [lock, setLock] = useState(false);
   const [scanSuccess, setScanSuccess] = useState(false);
   const [torchOn, setTorchOn] = useState(false);
+  const [alternatives, setAlternatives] = useState([]);
+  const [altLoading, setAltLoading] = useState(false);
 
   const scannerRef = useRef(null);
 
@@ -245,6 +297,7 @@ export default function Scanner() {
     setProduct(null);
     setError("");
     setBarcode("");
+    setAlternatives([]);
 
     try {
       const res = await fetch(`/api/product/${code}?lang=${lang}`, { method: "GET", credentials: "include" });
@@ -254,6 +307,16 @@ export default function Scanner() {
       setBarcode(code);
       setProduct(data);
       setError("");
+
+      if (data.nutriScore) {
+        const altUrl = `/api/scrape/alternatives?q=${encodeURIComponent(data.name)}&currentScore=${data.nutriScore}`;
+        setAltLoading(true);
+        fetch(altUrl)
+          .then(r => r.json())
+          .then(res => setAlternatives(res.alternatives || []))
+          .catch(() => setAlternatives([]))
+          .finally(() => setAltLoading(false));
+      }
 
       await fetch("/api/scans/save", {
         method: "POST",
@@ -329,6 +392,7 @@ export default function Scanner() {
     setBarcode(""); setProduct(null); setError("");
     setManualBarcode(""); setShowManual(false);
     setLock(false); setScanSuccess(false);
+    setAlternatives([]); setAltLoading(false);
     const reader = document.getElementById("reader");
     if (reader) reader.innerHTML = "";
   }, [safeStop]);
@@ -400,7 +464,13 @@ export default function Scanner() {
           </>
         )}
 
-        {product && <ProductResult product={product} />}
+        {product && (
+          <ProductResult
+            product={product}
+            alternatives={alternatives}
+            altLoading={altLoading}
+          />
+        )}
       </div>
     </div>
   );

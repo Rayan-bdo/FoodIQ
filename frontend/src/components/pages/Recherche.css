@@ -53,7 +53,6 @@
   cursor: not-allowed;
 }
 
-/* Loading */
 .recherche-loading {
   text-align: center;
   color: #666;
@@ -66,15 +65,14 @@
   border: 4px solid #eee;
   border-top: 4px solid #e8281e;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: rsearch-spin 0.8s linear infinite;
   margin: 0 auto 12px;
 }
 
-@keyframes spin {
+@keyframes rsearch-spin {
   to { transform: rotate(360deg); }
 }
 
-/* Messages */
 .recherche-error {
   text-align: center;
   color: red;
@@ -93,15 +91,14 @@
   font-size: 0.95rem;
 }
 
-/* Grid */
 .recherche-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 20px;
 }
 
-/* Product card */
-.product-card {
+/* Recherche-specific product card (prefixed to avoid clashing with Scanner.css) */
+.rsearch-card {
   background: white;
   border: 1px solid #eee;
   border-radius: 10px;
@@ -114,7 +111,12 @@
   position: relative;
 }
 
-.store-badge {
+.rsearch-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  transform: translateY(-3px);
+}
+
+.rsearch-store-badge {
   position: absolute;
   top: 8px;
   left: 8px;
@@ -126,20 +128,15 @@
   z-index: 2;
 }
 
-.badge-marjane {
+.rsearch-badge-marjane {
   background-color: #e8281e;
 }
 
-.badge-aswak {
+.rsearch-badge-aswak {
   background-color: #1e6fa8;
 }
 
-.product-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-  transform: translateY(-3px);
-}
-
-.product-image {
+.rsearch-image {
   width: 100%;
   height: 160px;
   object-fit: contain;
@@ -147,28 +144,28 @@
   padding: 10px;
 }
 
-.product-info {
+.rsearch-info {
   padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.product-titre {
+.rsearch-titre {
   font-size: 0.95rem;
   font-weight: 600;
   color: #222;
   margin: 0;
 }
 
-.product-prix {
+.rsearch-prix {
   font-size: 1rem;
   font-weight: bold;
   color: #e8281e;
   margin: 0;
 }
 
-.product-link {
+.rsearch-link {
   font-size: 0.82rem;
   color: #888;
   margin-top: auto;
