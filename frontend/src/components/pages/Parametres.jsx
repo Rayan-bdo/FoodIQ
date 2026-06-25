@@ -285,7 +285,7 @@ export default function Parametres() {
               <span className="about-badge">Node.js</span>
             </div>
             <p className="about-made">
-              {t("madeWith")} <FaHeart style={{ color: "#e74c3c" }} /> {t("by")} Rayan
+              {t("madeWith")} <FaHeart style={{ color: "#e74c3c" }} /> {t("by")} M7
             </p>
             <button className="btn-secondary" style={{ width: "100%", marginTop: 16 }} onClick={() => setShowAboutModal(false)}>
               {t("close")}
