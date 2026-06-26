@@ -4,10 +4,10 @@ const User = require("../models/User");
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "Lax",
+  secure: true,                    // toujours true en prod
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
   path: "/",
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 jours en ms — cohérent avec expiresIn: "7d"
+  maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
 // ====================== LOGIN ======================
@@ -95,11 +95,10 @@ exports.register = async (req, res) => {
 exports.logout = (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "Lax",
+    secure: true,
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
     path: "/"
   });
-
   return res.json({ message: "Logged out successfully" });
 };
 
