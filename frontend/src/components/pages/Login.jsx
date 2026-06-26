@@ -20,7 +20,9 @@ export default function Login() {
     }
 
     try {
-      const url = isLogin ? "/api/auth/login" : "/api/auth/register";
+      const url = isLogin 
+  ? `${process.env.REACT_APP_API_URL}/api/auth/login` 
+  : `${process.env.REACT_APP_API_URL}/api/auth/register`;
 
       const body = isLogin
         ? { email, password }
