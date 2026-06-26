@@ -41,8 +41,12 @@ app.use(cors({
     "http://localhost:3000",
     "http://localhost:5173",
     "https://panic-crystal-accompany.ngrok-free.dev",
+    "https://food-iq-coral.vercel.app",
+    "https://food-iwtuafdb7-rayans-projects-5b0ece57.vercel.app",
   ],
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
 app.use(express.json({ limit: "10kb" }));
@@ -70,7 +74,7 @@ app.use("/api/scans", scanRoutes);
 const aiRoutes = require("./routes/aiRoutes");
 app.use("/api/ai", aiRoutes);
 
-// ── Route scrape (ajout de ton ami) ──────────────────────────────────────────
+// ── Route scrape ──────────────────────────────────────────────────────────────
 const scrapeRoutes = require("./routes/scrapeRoutes");
 app.use("/api/scrape", scrapeRoutes);
 
