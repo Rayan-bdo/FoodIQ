@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { apiFetch } from "../../api";
 import "./Recherche.css";
 
 export default function Recherche() {
@@ -11,18 +12,13 @@ export default function Recherche() {
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!query.trim()) return;
-
     setLoading(true);
     setError("");
     setResults([]);
     setSearched(true);
-
     try {
-      const response = await fetch(
-        `/api/scrape?q=${encodeURIComponent(query)}`
-      );
+      const response = await apiFetch(`/api/scrape?q=${encodeURIComponent(query)}`);
       const data = await response.json();
-
       if (!response.ok || data.error) {
         setError(data.error || "Une erreur est survenue.");
       } else {
@@ -38,7 +34,6 @@ export default function Recherche() {
   return (
     <div className="recherche-container">
       <h1 className="recherche-title">Rechercher un produit</h1>
-
       <form className="recherche-form" onSubmit={handleSearch}>
         <input
           type="text"
@@ -51,52 +46,29 @@ export default function Recherche() {
           {loading ? "Recherche..." : "Rechercher"}
         </button>
       </form>
-
       {loading && (
         <div className="recherche-loading">
           <div className="spinner"></div>
           <p>Recherche chez Marjane et Aswak Assalam...</p>
         </div>
       )}
-
       {error && <p className="recherche-error">{error}</p>}
-
       {searched && !loading && !error && results.length === 0 && (
         <p className="recherche-empty">Aucun produit trouvé pour "{query}".</p>
       )}
-
       {results.length > 0 && (
         <div className="recherche-results">
           <p className="recherche-count">{results.length} produit(s) trouvé(s)</p>
           <div className="recherche-grid">
             {results.map((product) => (
-              <a
-                key={product.idProduit}
-                href={product.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rsearch-card"
-              >
-                <span
-                  className={`rsearch-store-badge ${
-                    product.magasin === "Marjane" ? "rsearch-badge-marjane" : "rsearch-badge-aswak"
-                  }`}
-                >
+              <a key={product.idProduit} href={product.url} target="_blank" rel="noopener noreferrer" className="rsearch-card">
+                <span className={`rsearch-store-badge ${product.magasin === "Marjane" ? "rsearch-badge-marjane" : "rsearch-badge-aswak"}`}>
                   {product.magasin}
                 </span>
-
-                {product.image && (
-                  <img
-                    src={product.image}
-                    alt={product.titre}
-                    className="rsearch-image"
-                  />
-                )}
+                {product.image && <img src={product.image} alt={product.titre} className="rsearch-image" />}
                 <div className="rsearch-info">
                   <h3 className="rsearch-titre">{product.titre}</h3>
-                  {product.prix && (
-                    <p className="rsearch-prix">{product.prix}</p>
-                  )}
+                  {product.prix && <p className="rsearch-prix">{product.prix}</p>}
                   <span className="rsearch-link">Voir le produit →</span>
                 </div>
               </a>

@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { FaBoxOpen, FaTimes, FaTrash } from "react-icons/fa";
 import { useLang } from "../../translations/LanguageContext";
 import { calculateScore, getScoreColor, getScoreLabel } from "../../utils/scoreUtils";
+import { apiFetch } from "../../api";
 import "./Historique.css";
 
 const NUTRI_BG = {
   a: "#1e8f4e", b: "#85bb2f", c: "#f9b233", d: "#ee8100", e: "#e63312",
 };
 
-/* ---------- Mini Score Circle ---------- */
 function MiniScore({ scan, lang }) {
   const score = calculateScore(scan);
   const color = getScoreColor(score);
@@ -17,13 +17,10 @@ function MiniScore({ scan, lang }) {
   const radius = 18;
   const circumference = 2 * Math.PI * radius;
   const progress = (score / 100) * circumference;
-
   return (
     <div className="mini-score-group">
       {ns && NUTRI_BG[ns] && (
-        <div className="mini-nutri-letter" style={{ background: NUTRI_BG[ns] }}>
-          {ns.toUpperCase()}
-        </div>
+        <div className="mini-nutri-letter" style={{ background: NUTRI_BG[ns] }}>{ns.toUpperCase()}</div>
       )}
       <div className="mini-score-wrapper">
         <svg width="50" height="50" viewBox="0 0 50 50">
@@ -39,7 +36,6 @@ function MiniScore({ scan, lang }) {
   );
 }
 
-/* ---------- Score Circle (modal) ---------- */
 function ScoreCircle({ scan, lang }) {
   const score = calculateScore(scan);
   const color = getScoreColor(score);
@@ -48,13 +44,10 @@ function ScoreCircle({ scan, lang }) {
   const radius = 28;
   const circumference = 2 * Math.PI * radius;
   const progress = (score / 100) * circumference;
-
   return (
     <div className="score-group">
       {ns && NUTRI_BG[ns] && (
-        <div className="nutri-letter-only" style={{ background: NUTRI_BG[ns] }}>
-          {ns.toUpperCase()}
-        </div>
+        <div className="nutri-letter-only" style={{ background: NUTRI_BG[ns] }}>{ns.toUpperCase()}</div>
       )}
       <div className="score-circle-wrapper">
         <svg width="80" height="80" viewBox="0 0 80 80">
@@ -70,11 +63,8 @@ function ScoreCircle({ scan, lang }) {
   );
 }
 
-/* ---------- Analyse qualités/défauts ---------- */
 function analyzeProduct(product, t) {
-  const qualities = [];
-  const defauts = [];
-
+  const qualities = [], defauts = [];
   if (product.sugar != null) {
     if (product.sugar <= 1) qualities.push({ icon: "🍬", label: t("sugar"), desc: t("qualSugarLow"), value: `${Number(product.sugar).toFixed(1)}g` });
     else if (product.sugar <= 5) qualities.push({ icon: "🍬", label: t("sugar"), desc: t("qualSugarOk"), value: `${Number(product.sugar).toFixed(1)}g` });
@@ -108,7 +98,6 @@ function analyzeProduct(product, t) {
     if (product.proteins >= 15) qualities.push({ icon: "💪", label: t("proteins"), desc: t("qualProtHigh"), value: `${Number(product.proteins).toFixed(1)}g` });
     else if (product.proteins >= 5) qualities.push({ icon: "💪", label: t("proteins"), desc: t("qualProtOk"), value: `${Number(product.proteins).toFixed(1)}g` });
   }
-
   return { qualities, defauts };
 }
 
@@ -119,10 +108,8 @@ function formatValue(val, unit) {
   return Number(val).toFixed(1);
 }
 
-/* ---------- Modal produit ---------- */
 function ProductModal({ scan, onClose, onDelete, lang, t }) {
   const { qualities, defauts } = analyzeProduct(scan, t);
-
   const allNutrients = [
     { key: "calories", label: t("calories"), unit: "kcal", icon: "🔥" },
     { key: "proteins", label: t("proteins"), unit: "g", icon: "💪" },
@@ -134,20 +121,11 @@ function ProductModal({ scan, onClose, onDelete, lang, t }) {
     { key: "sodium", label: t("sodium"), unit: "mg", icon: "⚗️" },
     { key: "fiber", label: t("fiber"), unit: "g", icon: "🥦" },
   ].filter((n) => scan[n.key] != null);
-
-  const product = {
-    nutriScore: scan.nutriScore,
-    calories: scan.calories, proteins: scan.proteins, carbs: scan.carbs,
-    fat: scan.fat, saturatedFat: scan.saturatedFat, sugar: scan.sugar,
-    salt: scan.salt, sodium: scan.sodium, fiber: scan.fiber,
-  };
-
+  const product = { nutriScore: scan.nutriScore, calories: scan.calories, proteins: scan.proteins, carbs: scan.carbs, fat: scan.fat, saturatedFat: scan.saturatedFat, sugar: scan.sugar, salt: scan.salt, sodium: scan.sodium, fiber: scan.fiber };
   return (
     <div className="histo-modal-overlay" onClick={onClose}>
       <div className="histo-modal" onClick={(e) => e.stopPropagation()}>
-
         <button className="histo-modal-close" onClick={onClose}><FaTimes /></button>
-
         <div className="histo-modal-header">
           {scan.image && <img src={scan.image} alt="" className="histo-modal-img" />}
           <div style={{ flex: 1 }}>
@@ -156,41 +134,32 @@ function ProductModal({ scan, onClose, onDelete, lang, t }) {
           </div>
           <ScoreCircle scan={product} lang={lang} />
         </div>
-
         {defauts.length > 0 && (
           <div className="histo-modal-section">
             <h3 className="histo-modal-section-title defaut-title">⚠️ {t("defauts")}</h3>
             {defauts.map((d, i) => (
               <div key={i} className="histo-modal-item">
                 <span className="analysis-icon">{d.icon}</span>
-                <div className="analysis-info">
-                  <span className="analysis-label">{d.label}</span>
-                  <span className="analysis-desc">{d.desc}</span>
-                </div>
+                <div className="analysis-info"><span className="analysis-label">{d.label}</span><span className="analysis-desc">{d.desc}</span></div>
                 <span className="analysis-value defaut-value">{d.value}</span>
                 <span className="analysis-dot defaut-dot" />
               </div>
             ))}
           </div>
         )}
-
         {qualities.length > 0 && (
           <div className="histo-modal-section">
             <h3 className="histo-modal-section-title qualite-title">✅ {t("qualites")}</h3>
             {qualities.map((q, i) => (
               <div key={i} className="histo-modal-item">
                 <span className="analysis-icon">{q.icon}</span>
-                <div className="analysis-info">
-                  <span className="analysis-label">{q.label}</span>
-                  <span className="analysis-desc">{q.desc}</span>
-                </div>
+                <div className="analysis-info"><span className="analysis-label">{q.label}</span><span className="analysis-desc">{q.desc}</span></div>
                 <span className="analysis-value qualite-value">{q.value}</span>
                 <span className="analysis-dot qualite-dot" />
               </div>
             ))}
           </div>
         )}
-
         {allNutrients.length > 0 && (
           <div className="histo-modal-section">
             <h3 className="histo-modal-section-title">{t("nutritionValues")} <span className="per100">pour 100g</span></h3>
@@ -205,21 +174,14 @@ function ProductModal({ scan, onClose, onDelete, lang, t }) {
             </div>
           </div>
         )}
-
-        {/* BOUTON SUPPRIMER */}
-        <button
-          className="histo-delete-btn"
-          onClick={() => { onDelete(scan._id); onClose(); }}
-        >
+        <button className="histo-delete-btn" onClick={() => { onDelete(scan._id); onClose(); }}>
           <FaTrash /> {t("")}
         </button>
-
       </div>
     </div>
   );
 }
 
-/* ---------- MAIN ---------- */
 export default function Historique() {
   const { t, lang } = useLang();
   const [history, setHistory] = useState([]);
@@ -230,63 +192,31 @@ export default function Historique() {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const res = await fetch("/api/scans/history", { credentials: "include" });
-        if (res.ok) {
-          const data = await res.json();
-          setHistory(data);
-        } else {
-          setError(t("historyError"));
-        }
+        const res = await apiFetch("/api/scans/history");
+        if (res.ok) { const data = await res.json(); setHistory(data); }
+        else setError(t("historyError"));
       } catch (err) {
         console.error("Erreur fetch historique:", err);
         setError(t("serverError"));
-      } finally {
-        setLoading(false);
-      }
+      } finally { setLoading(false); }
     };
-
     fetchHistory();
   }, [t]);
 
   const handleDelete = async (id) => {
     try {
-      const res = await fetch(`/api/scans/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (res.ok) {
-        setHistory((prev) => prev.filter((s) => s._id !== id));
-      }
-    } catch (err) {
-      console.error("Erreur suppression:", err);
-    }
+      const res = await apiFetch(`/api/scans/${id}`, { method: "DELETE" });
+      if (res.ok) setHistory((prev) => prev.filter((s) => s._id !== id));
+    } catch (err) { console.error("Erreur suppression:", err); }
   };
 
-  const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString(
-      lang === "ar" ? "ar-MA" : lang === "en" ? "en-GB" : "fr-FR",
-      { day: "numeric", month: "long", year: "numeric" }
-    );
-  };
+  const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString(
+    lang === "ar" ? "ar-MA" : lang === "en" ? "en-GB" : "fr-FR",
+    { day: "numeric", month: "long", year: "numeric" }
+  );
 
-  if (loading) {
-    return (
-      <div className="historique-container">
-        <div className="historique-loading">
-          <div className="loading-spinner" />
-          <p>{t("loading")}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="historique-container">
-        <div className="historique-error">😕 {error}</div>
-      </div>
-    );
-  }
+  if (loading) return <div className="historique-container"><div className="historique-loading"><div className="loading-spinner" /><p>{t("loading")}</p></div></div>;
+  if (error) return <div className="historique-container"><div className="historique-error">😕 {error}</div></div>;
 
   return (
     <div className="historique-container">
@@ -294,22 +224,14 @@ export default function Historique() {
         <h2>🕓 {t("historyTitle")}</h2>
         <span className="historique-count">{history.length} {t("scans")}</span>
       </div>
-
       {history.length === 0 ? (
-        <div className="historique-empty">
-          <FaBoxOpen className="empty-icon" />
-          <p>{t("historyEmpty")}</p>
-        </div>
+        <div className="historique-empty"><FaBoxOpen className="empty-icon" /><p>{t("historyEmpty")}</p></div>
       ) : (
         <div className="historique-list">
           {history.map((scan) => (
             <div key={scan._id} className="scan-card" onClick={() => setSelectedScan(scan)}>
               <div className="scan-image">
-                {scan.image ? (
-                  <img src={scan.image} alt={scan.productName} />
-                ) : (
-                  <FaBoxOpen className="scan-placeholder-icon" />
-                )}
+                {scan.image ? <img src={scan.image} alt={scan.productName} /> : <FaBoxOpen className="scan-placeholder-icon" />}
               </div>
               <div className="scan-info">
                 <h4 className="scan-name">{scan.productName || t("unknownProduct")}</h4>
@@ -321,16 +243,7 @@ export default function Historique() {
           ))}
         </div>
       )}
-
-      {selectedScan && (
-        <ProductModal
-          scan={selectedScan}
-          onClose={() => setSelectedScan(null)}
-          onDelete={handleDelete}
-          lang={lang}
-          t={t}
-        />
-      )}
+      {selectedScan && <ProductModal scan={selectedScan} onClose={() => setSelectedScan(null)} onDelete={handleDelete} lang={lang} t={t} />}
     </div>
   );
 }
