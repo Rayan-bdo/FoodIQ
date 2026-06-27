@@ -300,7 +300,11 @@ export default function Scanner() {
     setAlternatives([]);
 
     try {
-      const res = await fetch(`/api/product/${code}?lang=${lang}`, { method: "GET", credentials: "include" });
+      // Récupération de l'URL absolue de ton backend Railway
+      const apiUrl = process.env.REACT_APP_API_URL || "";
+
+      // 1. Fetch du produit sur Railway avec credentials inclus
+      const res = await fetch(`${apiUrl}/api/product/${code}?lang=${lang}`, { method: "GET", credentials: "include" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Introuvable");
 
@@ -309,16 +313,18 @@ export default function Scanner() {
       setError("");
 
       if (data.nutriScore) {
-        const altUrl = `/api/scrape/alternatives?q=${encodeURIComponent(data.name)}&currentScore=${data.nutriScore}`;
+        // 2. Fetch du scraper d'alternatives sur Railway
+        const altUrl = `${apiUrl}/api/scrape/alternatives?q=${encodeURIComponent(data.name)}&currentScore=${data.nutriScore}`;
         setAltLoading(true);
-        fetch(altUrl)
+        fetch(altUrl, { credentials: "include" })
           .then(r => r.json())
           .then(res => setAlternatives(res.alternatives || []))
           .catch(() => setAlternatives([]))
           .finally(() => setAltLoading(false));
       }
 
-      await fetch("/api/scans/save", {
+      // 3. Sauvegarde de l'historique sur Railway
+      await fetch(`${apiUrl}/api/scans/save`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
