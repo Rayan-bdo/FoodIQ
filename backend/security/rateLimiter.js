@@ -2,11 +2,11 @@ const rateLimit = require("express-rate-limit");
 
 // ── Limiter global (toutes les routes) ──────────────────────────────────────
 const globalLimiter = rateLimit({
-  windowMs: 60 * 1000,   // 1 minute
-  max: 100,
+  windowMs: 5 * 60 * 1000,   // 1 minute
+  max: 10,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Too many requests, please try again later." }
+  message: { error: "Trop de tentatives de connexion. Réessaie dans 5 minutes." }
 });
 
 // ── Limiter strict pour login/register ──────────────────────────────────────
