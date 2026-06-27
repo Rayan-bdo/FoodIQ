@@ -13,21 +13,18 @@ export default function Profil() {
   const [stats, setStats] = useState({ totalScans: 0, goodProducts: 0, badProducts: 0 });
   const [distribution, setDistribution] = useState({ a: 0, b: 0, c: 0, d: 0, e: 0 });
   const [lastScan, setLastScan] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // ← bloque tout l'affichage
 
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        // Récupération de l'URL de ton backend Railway depuis les variables d'environnement
-        const apiUrl = process.env.REACT_APP_API_URL || "";
-
-        // Les deux fetches en parallèle sur ton vrai domaine backend avec credentials inclus
+        // Les deux fetches en parallèle
         const [userRes, scansRes] = await Promise.all([
-          fetch(`${apiUrl}/api/auth/profile`, { method: "GET", credentials: "include" }),
-          fetch(`${apiUrl}/api/scans/history`, { method: "GET", credentials: "include" }),
+          fetch("/api/auth/profile", { method: "GET", credentials: "include" }),
+          fetch("/api/scans/history", { method: "GET", credentials: "include" }),
         ]);
 
-        // Si le backend rejette la session → redirection vers l'accueil / login
+        // Si pas connecté → redirect immédiat
         if (!userRes.ok) {
           navigate("/");
           return;
@@ -62,7 +59,7 @@ export default function Profil() {
           if (scans.length > 0) setLastScan(scans[0]);
         }
       } catch (error) {
-        console.error("Erreur chargement profil:", error);
+        console.error(error);
         navigate("/");
       } finally {
         setLoading(false);
@@ -80,6 +77,7 @@ export default function Profil() {
     return "❓";
   };
 
+  // ← Rien ne s'affiche tant que les données ne sont pas prêtes
   if (loading) {
     return (
       <div className="profil-loading">
