@@ -34,6 +34,14 @@ def make_browser():
         "profile.managed_default_content_settings.images": 2
     })
 
+    import platform
+    if platform.system() == "Linux":
+        service = Service("/usr/bin/chromedriver")
+    else:
+        service = Service(CHROMEDRIVER_PATH)
+
+    return webdriver.Chrome(service=service, options=options)
+
     if IS_LINUX:
         # Sur Render : Chrome installé via apt, chromedriver via webdriver-manager
         from webdriver_manager.chrome import ChromeDriverManager
