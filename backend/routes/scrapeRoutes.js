@@ -5,13 +5,11 @@ const path = require("path");
 const https = require("https");
 
 const SCRAPER_PATH = path.join(__dirname, "../scraper/scraper.py");
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
-// ─── Rang Nutri-Score (A=meilleur, E=pire) ───────────────────────────────────
 const SCORE_RANK = { A: 1, B: 2, C: 3, D: 4, E: 5 };
 
-// ─── Catégories alimentaires ──────────────────────────────────────────────────
 const CATEGORY_MAP = [
-
   { detect: ["m&m", "m&ms", "smarties", "skittles", "haribo", "dragée", "bonbon", "candy", "confiserie", "caramel", "réglisse", "reglisse", "chewing gum", "chewingum", "bubble gum", "mentos", "tic tac", "marshmallow", "guimauve", "nougat", "berlingot", "carambars", "pik", "sour patch", "jellybeans", "lollipop", "sucette", "pastille", "drops", "werther"], query: "chocolat" },
   { detect: ["bounty", "twix", "kitkat", "kit kat", "snickers", "mars bar", "lion bar", "kinder", "ferrero", "raffaello", "rocher", "after eight", "rolo", "maltesers", "milky way", "crunch bar", "aero", "flake", "toblerone", "lindt ball", "lindor", "daim", "dime"], query: "chocolat" },
   { detect: ["biscuit", "cookie", "crackers", "gaufrette", "wafer", "gaufre", "prince", "oreo", "lu ", "petit beurre", "tonik", "tonico", "merendina", "barquette", "madeleine", "brownie", "choco pie", "pepito", "pim's", "bn ", "tuc ", "ritz", "digestive", "hobnob", "leibniz", "bahlsen", "mcvitie", "mc vitie", "granola bar", "cereal bar", "barre céréale", "barre cereale", "nature valley", "speculoos", "spéculoos", "stroopwafel", "langue de chat", "palmier", "sablé", "sable biscuit", "galette", "petit four", "financier", "mini cake"], query: "biscuit" },
@@ -41,16 +39,13 @@ const CATEGORY_MAP = [
 function detectCategoryQuery(productName) {
   const lower = productName.toLowerCase();
   for (const cat of CATEGORY_MAP) {
-    if (cat.detect.some(keyword => lower.includes(keyword))) {
-      return cat.query;
-    }
+    if (cat.detect.some(keyword => lower.includes(keyword))) return cat.query;
   }
-  return "biscuit"; // fallback universel
+  return "biscuit";
 }
 
-// ─── Lance scraper.py ────────────────────────────────────────────────────────
 function runScraper(query, forAlternatives = false) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const args = [SCRAPER_PATH, query];
     if (forAlternatives) args.push("--alternatives");
 
@@ -58,32 +53,27 @@ function runScraper(query, forAlternatives = false) {
       env: { ...process.env, PYTHONIOENCODING: "utf-8" }
     });
 
-    let output = "";
-    let errorOutput = "";
+    // Timeout 60 secondes — tue le process si trop long
+    const timer = setTimeout(() => {
+      child.kill();
+      resolve([]);
+    }, 60000);
 
+    let output = "", errorOutput = "";
     child.stdout.setEncoding("utf-8");
     child.stderr.setEncoding("utf-8");
-
     child.stdout.on("data", (data) => { output += data; });
     child.stderr.on("data", (data) => { errorOutput += data; });
-
-    child.on("close", (code) => {
-      if (code !== 0 && !output) {
-        return reject(new Error(errorOutput || "Scraper failed"));
-      }
-      try {
-        resolve(JSON.parse(output));
-      } catch (e) {
-        reject(new Error("Failed to parse scraper output: " + output.slice(0, 200)));
-      }
+    child.on("close", () => {
+      clearTimeout(timer);
+      try { resolve(JSON.parse(output)); }
+      catch { resolve([]); }
     });
   });
 }
 
-// ─── Cherche le Nutri-Score d'un produit sur OpenFoodFacts ───────────────────
 function fetchNutriScore(title) {
   return new Promise((resolve) => {
-    // Extraire marque si format "Nom produit - MARQUE"
     let searchTerm;
     if (title.includes(" - ")) {
       const parts = title.split(" - ");
@@ -104,20 +94,15 @@ function fetchNutriScore(title) {
           const products = json.products || [];
           const found = products.find(p => p.nutrition_grades && p.nutrition_grades.match(/^[a-e]$/i));
           resolve(found ? found.nutrition_grades.toUpperCase() : null);
-        } catch {
-          resolve(null);
-        }
+        } catch { resolve(null); }
       });
     }).on("error", () => resolve(null));
   });
 }
 
-// ─── Route principale : scrape simple ────────────────────────────────────────
 router.get("/", async (req, res) => {
   const query = req.query.q;
-  if (!query?.trim()) {
-    return res.status(400).json({ error: "Query parameter 'q' is required" });
-  }
+  if (!query?.trim()) return res.status(400).json({ error: "Query parameter 'q' is required" });
   try {
     console.log(`[Scraper] Searching for: ${query}`);
     const produits = await runScraper(query.trim());
@@ -130,76 +115,59 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ─── Route barcode ────────────────────────────────────────────────────────────
 router.get("/barcode/:code", async (req, res) => {
   const code = req.params.code;
   if (!code) return res.status(400).json({ error: "Barcode is required" });
   try {
-    console.log(`[Scraper] Searching by barcode: ${code}`);
     const produits = await runScraper(code);
     if (produits.error) return res.status(500).json({ error: produits.error });
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.json({ success: true, barcode: code, results: produits });
   } catch (err) {
-    console.error("[Scraper] Error:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-// ─── Route alternatives ───────────────────────────────────────────────────────
 router.get("/alternatives", async (req, res) => {
   const { q, currentScore } = req.query;
-
-  if (!q?.trim() || !currentScore) {
-    return res.status(400).json({ error: "Paramètres 'q' et 'currentScore' requis" });
-  }
+  if (!q?.trim() || !currentScore) return res.status(400).json({ error: "Paramètres 'q' et 'currentScore' requis" });
 
   const currentRank = SCORE_RANK[currentScore.toUpperCase()];
-  if (!currentRank) {
-    return res.status(400).json({ error: "currentScore invalide (attendu : A/B/C/D/E)" });
+  if (!currentRank) return res.status(400).json({ error: "currentScore invalide" });
+
+  // En production, le scraper Selenium n'est pas disponible
+  if (IS_PRODUCTION) {
+    console.log(`[Alternatives] Production mode — scraper désactivé`);
+    return res.json({ alternatives: [] });
   }
 
   try {
     const categoryQuery = detectCategoryQuery(q);
-    console.log(`[Alternatives] Query originale : "${q}"`);
-    console.log(`[Alternatives] Catégorie query : "${categoryQuery}"`);
+    console.log(`[Alternatives] Query: "${q}" → catégorie: "${categoryQuery}"`);
 
-    // ── Scrape la catégorie détectée ──────────────────────────────────────────
     const rawResults = await runScraper(categoryQuery, true);
-    console.log(`[Alternatives] Résultats "${categoryQuery}" : ${rawResults.length}`);
+    console.log(`[Alternatives] Résultats: ${rawResults.length}`);
+    if (rawResults.length === 0) return res.json({ alternatives: [] });
 
-    if (rawResults.length === 0) {
-      return res.json({ alternatives: [] });
-    }
-
-    // ── Filtrage par catégorie dans le titre ──────────────────────────────────
     let candidates = rawResults;
-    const filtered = rawResults.filter(p =>
-      p.titre.toLowerCase().includes(categoryQuery.toLowerCase())
-    );
+    const filtered = rawResults.filter(p => p.titre.toLowerCase().includes(categoryQuery.toLowerCase()));
     if (filtered.length >= 3) candidates = filtered;
-    console.log(`[Alternatives] Candidats : ${candidates.length}`);
 
-    // ── Enrichissement Nutri-Score ────────────────────────────────────────────
     const enriched = await Promise.all(
       candidates.slice(0, 30).map(async (p) => {
         const score = await fetchNutriScore(p.titre);
         return { ...p, nutriScore: score };
       })
     );
-    console.log(`[Alternatives] Enrichis :`, enriched.map(p => `${p.titre} → ${p.nutriScore}`));
 
-    // ── Filtre final : score strictement meilleur, pas de fallback ────────────
     const meilleures = enriched
       .filter(p => p.nutriScore && SCORE_RANK[p.nutriScore] < currentRank)
       .sort((a, b) => SCORE_RANK[a.nutriScore] - SCORE_RANK[b.nutriScore])
       .slice(0, 6);
 
-    console.log(`[Alternatives] Alternatives finales : ${meilleures.length}`);
     res.json({ alternatives: meilleures });
-
   } catch (err) {
-    console.error("[Alternatives] Erreur :", err.message);
+    console.error("[Alternatives] Erreur:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
