@@ -121,7 +121,11 @@ function ProductModal({ scan, onClose, onDelete, lang, t }) {
     { key: "sodium", label: t("sodium"), unit: "mg", icon: "⚗️" },
     { key: "fiber", label: t("fiber"), unit: "g", icon: "🥦" },
   ].filter((n) => scan[n.key] != null);
-  const product = { nutriScore: scan.nutriScore, calories: scan.calories, proteins: scan.proteins, carbs: scan.carbs, fat: scan.fat, saturatedFat: scan.saturatedFat, sugar: scan.sugar, salt: scan.salt, sodium: scan.sodium, fiber: scan.fiber };
+  const product = {
+    nutriScore: scan.nutriScore, calories: scan.calories, proteins: scan.proteins,
+    carbs: scan.carbs, fat: scan.fat, saturatedFat: scan.saturatedFat,
+    sugar: scan.sugar, salt: scan.salt, sodium: scan.sodium, fiber: scan.fiber,
+  };
   return (
     <div className="histo-modal-overlay" onClick={onClose}>
       <div className="histo-modal" onClick={(e) => e.stopPropagation()}>
@@ -187,18 +191,29 @@ export default function Historique() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [notLogged, setNotLogged] = useState(false);
   const [selectedScan, setSelectedScan] = useState(null);
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
         const res = await apiFetch("/api/scans/history");
-        if (res.ok) { const data = await res.json(); setHistory(data); }
-        else setError(t("historyError"));
+
+        if (res.ok) {
+          const data = await res.json();
+          setHistory(data);
+        } else if (res.status === 401 || res.status === 403) {
+          // ✅ Pas connecté → message dédié, pas d'erreur générique
+          setNotLogged(true);
+        } else {
+          setError(t("historyError"));
+        }
       } catch (err) {
         console.error("Erreur fetch historique:", err);
         setError(t("serverError"));
-      } finally { setLoading(false); }
+      } finally {
+        setLoading(false);
+      }
     };
     fetchHistory();
   }, [t]);
@@ -207,16 +222,49 @@ export default function Historique() {
     try {
       const res = await apiFetch(`/api/scans/${id}`, { method: "DELETE" });
       if (res.ok) setHistory((prev) => prev.filter((s) => s._id !== id));
-    } catch (err) { console.error("Erreur suppression:", err); }
+    } catch (err) {
+      console.error("Erreur suppression:", err);
+    }
   };
 
-  const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString(
-    lang === "ar" ? "ar-MA" : lang === "en" ? "en-GB" : "fr-FR",
-    { day: "numeric", month: "long", year: "numeric" }
+  const formatDate = (dateStr) =>
+    new Date(dateStr).toLocaleDateString(
+      lang === "ar" ? "ar-MA" : lang === "en" ? "en-GB" : "fr-FR",
+      { day: "numeric", month: "long", year: "numeric" }
+    );
+
+  // ── États de rendu ──
+
+  if (loading) return (
+    <div className="historique-container">
+      <div className="historique-loading">
+        <div className="loading-spinner" />
+        <p>{t("loading")}</p>
+      </div>
+    </div>
   );
 
-  if (loading) return <div className="historique-container"><div className="historique-loading"><div className="loading-spinner" /><p>{t("loading")}</p></div></div>;
-  if (error) return <div className="historique-container"><div className="historique-error">😕 {error}</div></div>;
+  // Pas connecté
+  if (notLogged) return (
+    <div className="historique-container">
+      <div className="historique-error" style={{ textAlign: "center", padding: "48px 24px" }}>
+        <div style={{ fontSize: "3rem", marginBottom: "16px" }}>🔒</div>
+        <p style={{ fontSize: "1.1rem", fontWeight: 600, marginBottom: "8px" }}>
+          {t("notLoggedIn") || "Vous n'êtes pas connecté"}
+        </p>
+        <p style={{ fontSize: "0.9rem", opacity: 0.7 }}>
+          {t("loginToSeeHistory") || "Connectez-vous pour accéder à votre historique de scans."}
+        </p>
+      </div>
+    </div>
+  );
+
+  // Erreur serveur
+  if (error) return (
+    <div className="historique-container">
+      <div className="historique-error">😕 {error}</div>
+    </div>
+  );
 
   return (
     <div className="historique-container">
@@ -225,13 +273,18 @@ export default function Historique() {
         <span className="historique-count">{history.length} {t("scans")}</span>
       </div>
       {history.length === 0 ? (
-        <div className="historique-empty"><FaBoxOpen className="empty-icon" /><p>{t("historyEmpty")}</p></div>
+        <div className="historique-empty">
+          <FaBoxOpen className="empty-icon" />
+          <p>{t("historyEmpty")}</p>
+        </div>
       ) : (
         <div className="historique-list">
           {history.map((scan) => (
             <div key={scan._id} className="scan-card" onClick={() => setSelectedScan(scan)}>
               <div className="scan-image">
-                {scan.image ? <img src={scan.image} alt={scan.productName} /> : <FaBoxOpen className="scan-placeholder-icon" />}
+                {scan.image
+                  ? <img src={scan.image} alt={scan.productName} />
+                  : <FaBoxOpen className="scan-placeholder-icon" />}
               </div>
               <div className="scan-info">
                 <h4 className="scan-name">{scan.productName || t("unknownProduct")}</h4>
@@ -243,7 +296,15 @@ export default function Historique() {
           ))}
         </div>
       )}
-      {selectedScan && <ProductModal scan={selectedScan} onClose={() => setSelectedScan(null)} onDelete={handleDelete} lang={lang} t={t} />}
+      {selectedScan && (
+        <ProductModal
+          scan={selectedScan}
+          onClose={() => setSelectedScan(null)}
+          onDelete={handleDelete}
+          lang={lang}
+          t={t}
+        />
+      )}
     </div>
   );
 }

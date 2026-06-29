@@ -13,6 +13,8 @@ const translations = {
     historyTitle: "Historique", scans: "scans", historyEmpty: "Aucun scan enregistré.",
     historyError: "Erreur lors de la récupération de l'historique", serverError: "Erreur serveur",
     loading: "Chargement...", unknownProduct: "Produit inconnu",
+    notLoggedIn: "Vous n'êtes pas connecté",
+    loginToSeeHistory: "Connectez-vous pour accéder à votre historique de scans.",
     // Profil
     online: "En ligne", yourStats: "Tes statistiques", totalScans: "Total scans",
     goodProducts: "Bons produits", badProducts: "Mauvais produits",
@@ -96,6 +98,8 @@ const translations = {
     historyTitle: "History", scans: "scans", historyEmpty: "No scans recorded.",
     historyError: "Error fetching history", serverError: "Server error",
     loading: "Loading...", unknownProduct: "Unknown product",
+    notLoggedIn: "You are not logged in",
+    loginToSeeHistory: "Log in to access your scan history.",
     // Profil
     online: "Online", yourStats: "Your statistics", totalScans: "Total scans",
     goodProducts: "Good products", badProducts: "Bad products",
@@ -179,6 +183,8 @@ const translations = {
     historyTitle: "السجل", scans: "مسح", historyEmpty: "لا يوجد سجل مسح.",
     historyError: "خطأ في استرجاع السجل", serverError: "خطأ في الخادم",
     loading: "جارٍ التحميل...", unknownProduct: "منتج غير معروف",
+    notLoggedIn: "أنت غير مسجل الدخول",
+    loginToSeeHistory: "سجّل دخولك للوصول إلى سجل مسحك.",
     // Profil
     online: "متصل", yourStats: "إحصائياتك", totalScans: "إجمالي المسح",
     goodProducts: "منتجات جيدة", badProducts: "منتجات سيئة",
