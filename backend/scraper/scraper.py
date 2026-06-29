@@ -2,6 +2,7 @@ import sys
 import json
 import time
 import os
+import platform
 from concurrent.futures import ThreadPoolExecutor
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -9,10 +10,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
-
-# Sur Linux (Render), Chrome/Chromium est installé via apt
-# Sur Windows (dev local), on utilise chromedriver.exe local
-IS_LINUX = sys.platform.startswith("linux")
 
 
 def make_browser():
@@ -34,20 +31,9 @@ def make_browser():
         "profile.managed_default_content_settings.images": 2
     })
 
-    import platform
     if platform.system() == "Linux":
         service = Service("/usr/bin/chromedriver")
     else:
-        service = Service(CHROMEDRIVER_PATH)
-
-    return webdriver.Chrome(service=service, options=options)
-
-    if IS_LINUX:
-        # Sur Render : Chrome installé via apt, chromedriver via webdriver-manager
-        from webdriver_manager.chrome import ChromeDriverManager
-        service = Service(ChromeDriverManager().install())
-    else:
-        # En local Windows : chromedriver.exe dans le même dossier
         CHROMEDRIVER_PATH = os.path.join(os.path.dirname(__file__), "chromedriver.exe")
         service = Service(CHROMEDRIVER_PATH)
 
