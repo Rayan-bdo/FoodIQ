@@ -141,7 +141,7 @@ async function callGroq(message, lastScan) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: "llama-3.1-8b-instant", // ✅ modèle mis à jour — llama-3.3-70b-versatile déprécié le 16 août 2026
         messages: [
           {
             role: "user",

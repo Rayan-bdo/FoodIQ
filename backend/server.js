@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const path = require("path");
 const helmet = require("helmet");
+const mongoSanitize = require("express-mongo-sanitize"); // ✅ ajouté
 
 dotenv.config({
   path: path.resolve(__dirname, ".env"),
@@ -51,6 +52,7 @@ app.use(cors({
 
 app.use(express.json({ limit: "10kb" }));
 app.use(cookieParser());
+app.use(mongoSanitize()); // ✅ protection injection NoSQL — filtre les opérateurs MongoDB ($gt, $ne...) avant qu'ils atteignent la base de données
 
 app.use((req, res, next) => {
   console.log("➡️ REQUEST:", req.method, req.originalUrl);
