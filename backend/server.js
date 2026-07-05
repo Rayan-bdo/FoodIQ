@@ -5,7 +5,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const path = require("path");
 const helmet = require("helmet");
-const mongoSanitize = require("express-mongo-sanitize"); // ✅ ajouté
+
 
 dotenv.config({
   path: path.resolve(__dirname, ".env"),
@@ -52,11 +52,6 @@ app.use(cors({
 
 app.use(express.json({ limit: "10kb" }));
 app.use(cookieParser());
-app.use(mongoSanitize({
-  allowDots: true,     // autorise les points dans les emails
-  replaceWith: '_',    // remplace $ par _ au lieu de supprimer
-})); // ✅ protection injection NoSQL
-
 app.use((req, res, next) => {
   console.log("➡️ REQUEST:", req.method, req.originalUrl);
   next();
