@@ -52,7 +52,10 @@ app.use(cors({
 
 app.use(express.json({ limit: "10kb" }));
 app.use(cookieParser());
-app.use(mongoSanitize()); // ✅ protection injection NoSQL — filtre les opérateurs MongoDB ($gt, $ne...) avant qu'ils atteignent la base de données
+app.use(mongoSanitize({
+  allowDots: true,     // autorise les points dans les emails
+  replaceWith: '_',    // remplace $ par _ au lieu de supprimer
+})); // ✅ protection injection NoSQL
 
 app.use((req, res, next) => {
   console.log("➡️ REQUEST:", req.method, req.originalUrl);
