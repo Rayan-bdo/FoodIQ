@@ -11,12 +11,12 @@ const globalLimiter = rateLimit({
 
 // ── Limiter strict pour login/register ──────────────────────────────────────
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
+  windowMs: 1 * 60 * 1000,   // ✅ 1 minute au lieu de 15 pour les tests
+  max: 20,                    // ✅ 20 tentatives au lieu de 5 pour les tests
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true,
-  message: { error: "Trop de tentatives de connexion. Réessaie dans 15 minutes." }
+  message: { error: "Trop de tentatives de connexion. Réessaie dans 1 minute." }
 });
 
 // ── Limiter pour le chat IA ──────────────────────────────────────────────────
