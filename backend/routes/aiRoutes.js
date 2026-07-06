@@ -149,7 +149,7 @@ async function callGroq(message, lastScan) {
           },
         ],
         max_tokens: 650,
-        temperature: 0.7,
+        temperature: 0.3,
       }),
     }
   );
